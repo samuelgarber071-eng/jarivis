@@ -3,144 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitePlayer Ultra (AIMP Style)</title>
+    <title>LitePlayer Ultra Pro</title>
     <style>
         :root {
-            --bg-main: #1e1e24;
-            --bg-list: #141418;
+            --bg-main: #0f0f12;
+            --bg-card: #16161a;
+            --bg-list: #1a1a22;
             --accent: #ff6b00; 
-            --text: #e0e0e0;
-            --text-muted: #888;
+            --accent-hover: #e05e00;
+            --text: #f0f0f5;
+            --text-muted: #a0a0aa;
+            --border: #272730;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text); display: flex; justify-content: center; align-items: center; height: 100vh; padding: 10px; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+        }
+
+        body { 
+            background-color: var(--bg-main); 
+            color: var(--text); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            padding: 20px; 
+        }
 
         .player-container {
             width: 100%;
-            max-width: 420px;
-            background: var(--bg-list);
-            border: 1px solid #333;
-            border-radius: 6px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-width: 440px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            max-height: 95vh;
+            max-height: 90vh;
         }
 
         .player-header {
-            padding: 15px;
-            background: linear-gradient(to bottom, #2a2a32, var(--bg-main));
-            border-bottom: 1px solid #333;
+            padding: 20px;
+            background: linear-gradient(to bottom, #22222b, var(--bg-card));
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Nova seção do YouTube */
+        .youtube-zone {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px dashed #444;
+        }
+        .youtube-zone h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .youtube-input-group {
+            display: flex;
+            gap: 6px;
+        }
+        .youtube-input {
+            flex-grow: 1;
+            background: #101014;
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 13px;
+            border-radius: 6px;
+            outline: none;
+        }
+        .youtube-input:focus {
+            border-color: var(--accent);
         }
 
         .track-title {
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 15px;
+            font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: var(--accent);
+            text-align: center;
         }
 
-        audio { width: 100%; margin-bottom: 10px; height: 32px; }
+        audio { 
+            width: 100%; 
+            margin-bottom: 12px; 
+            height: 40px; 
+            border-radius: 8px;
+        }
 
-        /* Zona de Volume e Controles Dinâmicos */
         .volume-zone {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: #1a1a20;
-            padding: 6px 10px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            font-size: 12px;
+            gap: 10px;
+            background: #111116;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.03);
         }
         .volume-slider {
             flex-grow: 1;
             accent-color: var(--accent);
             cursor: pointer;
-            height: 4px;
+            height: 5px;
         }
 
         .playlist-selector-zone {
             display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-            background: #1a1a20;
-            padding: 5px;
-            border-radius: 4px;
-            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
         }
-        select { background: #2d2d35; color: var(--text); border: 1px solid #444; padding: 4px; font-size: 12px; flex-grow: 1; border-radius: 3px; }
+        select { 
+            background: #1c1c24; 
+            color: var(--text); 
+            border: 1px solid var(--border); 
+            padding: 8px; 
+            font-size: 13px; 
+            flex-grow: 1; 
+            border-radius: 6px;
+            outline: none;
+        }
         
-        .file-controls { display: flex; gap: 5px; margin-bottom: 5px; }
+        .file-controls { display: flex; gap: 6px; margin-bottom: 5px; }
         
         .btn {
-            background: #2d2d35;
+            background: #22222a;
             color: var(--text);
-            border: 1px solid #444;
-            padding: 6px 10px;
-            font-size: 12px;
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            font-size: 13px;
             cursor: pointer;
-            border-radius: 3px;
-            text-align: center;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.2s ease;
         }
-        .btn:hover { background: #3d3d45; border-color: var(--accent); }
+        .btn:hover { background: #2c2c38; border-color: var(--accent); }
         .btn-accent { background: var(--accent); color: #000; font-weight: bold; border: none; flex-grow: 1; }
-        .btn-accent:hover { background: #e05e00; }
-        .btn-sm { padding: 4px 8px; font-size: 11px; }
+        .btn-accent:hover { background: var(--accent-hover); }
+        .btn-sm { padding: 6px 10px; font-size: 12px; }
 
         input[type="file"] { display: none; }
 
         .playlist-actions {
             display: flex;
             justify-content: space-between;
-            padding: 6px 10px;
-            background: #16161c;
-            font-size: 11px;
-            border-bottom: 1px solid #222;
+            padding: 10px 15px;
+            background: #111116;
+            font-size: 12px;
+            border-bottom: 1px solid var(--border);
         }
-        .action-link { color: var(--text-muted); cursor: pointer; user-select: none; }
+        .action-link { color: var(--text-muted); cursor: pointer; user-select: none; transition: color 0.2s; }
         .action-link:hover { color: var(--accent); }
 
-        .playlist { list-style: none; overflow-y: auto; flex-grow: 1; background: var(--bg-list); }
+        .playlist { 
+            list-style: none; 
+            overflow-y: auto; 
+            flex-grow: 1; 
+            background: var(--bg-list);
+            min-height: 150px;
+        }
 
         .playlist-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 10px;
-            border-bottom: 1px solid #19191f;
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
             font-size: 13px;
             user-select: none;
+            transition: background 0.2s;
         }
-        .playlist-item:hover { background: #1c1c24; }
-        .playlist-item.active { background: #252530; border-left: 3px solid var(--accent); }
+        .playlist-item:hover { background: rgba(255,255,255,0.03); }
+        .playlist-item.active { background: rgba(255, 107, 0, 0.1); border-left: 4px solid var(--accent); }
 
-        .item-info { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
-        .item-controls { display: flex; gap: 4px; opacity: 0.3; }
+        .item-info { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-right: 10px; }
+        .item-controls { display: flex; gap: 6px; opacity: 0.1; transition: opacity 0.2s; }
         .playlist-item:hover .item-controls { opacity: 1; }
         
-        .icon-btn { background: none; border: none; color: var(--text); cursor: pointer; font-size: 11px; padding: 2px 4px; }
-        .icon-btn:hover { color: var(--accent); }
+        .icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; padding: 4px; border-radius: 4px; }
+        .icon-btn:hover { color: var(--accent); background: rgba(255,255,255,0.05); }
         
-        #import-status { font-size: 11px; color: var(--accent); text-align: center; padding: 2px; display: none; background: #251200;}
+        #import-status { 
+            font-size: 12px; 
+            color: #fff; 
+            text-align: center; 
+            padding: 8px; 
+            display: none; 
+            background: var(--accent);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
 <div class="player-container">
     <div class="player-header">
+        <div class="youtube-zone">
+            <h4>🔺 Baixar do YouTube (MP3)</h4>
+            <div class="youtube-input-group">
+                <input type="text" id="youtube-url" class="youtube-input" placeholder="Cole o link do vídeo aqui...">
+                <button class="btn btn-accent btn-sm" id="btn-yt-download" style="flex-grow:0; width:80px;">Baixar</button>
+            </div>
+        </div>
+
         <div class="track-title" id="current-title">Nenhuma música tocando</div>
         <audio id="audio-player" controls></audio>
         
         <div class="volume-zone">
             <span id="volume-icon">🔊</span>
             <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.8">
-            <span id="volume-label" style="width: 30px; text-align: right;">80%</span>
+            <span id="volume-label" style="width: 35px; text-align: right;">80%</span>
         </div>
 
         <div class="playlist-selector-zone">
@@ -151,7 +242,7 @@
         </div>
 
         <div class="file-controls">
-            <label class="btn btn-accent" for="file-upload">＋ Adicionar Músicas</label>
+            <label class="btn btn-accent" for="file-upload">＋ Arquivos Locais</label>
             <input type="file" id="file-upload" accept="audio/*" multiple>
             <button class="btn" id="btn-clear-all">Limpar Banco</button>
         </div>
@@ -161,8 +252,8 @@
 
     <div class="playlist-actions">
         <span class="action-link" id="sort-az">🔤 Organizar A-Z</span>
-        <span class="action-link" id="btn-export">📤 Exportar Backup</span>
-        <label class="action-link" for="input-import">📥 Importar Backup</label>
+        <span class="action-link" id="btn-export">📤 Exportar</span>
+        <label class="action-link" for="input-import">📥 Importar</label>
         <input type="file" id="input-import" accept=".json" style="display:none;">
     </div>
 
@@ -202,7 +293,6 @@
     let currentTrackId = null;
     let currentObjectURL = null;
 
-    // Inicialização do controle de Volume Inteligente (e memória local do volume)
     function initVolume() {
         const savedVolume = localStorage.getItem('player-volume');
         if (savedVolume !== null) {
@@ -221,15 +311,10 @@
 
     function updateVolumeUI(vol) {
         volumeLabel.textContent = `${Math.round(vol * 100)}%`;
-        if (vol === 0) {
-            volumeIcon.textContent = '🔇';
-        } else if (vol < 0.4) {
-            volumeIcon.textContent = '🔈';
-        } else if (vol < 0.7) {
-            volumeIcon.textContent = '🔉';
-        } else {
-            volumeIcon.textContent = '🔊';
-        }
+        if (vol === 0) volumeIcon.textContent = '🔇';
+        else if (vol < 0.4) volumeIcon.textContent = '🔈';
+        else if (vol < 0.7) volumeIcon.textContent = '🔉';
+        else volumeIcon.textContent = '🔊';
     }
 
     function checkAndLoadPlaylists() {
@@ -352,6 +437,67 @@
             store.add(track);
         }
         tx.oncomplete = () => { loadTracks(); };
+    });
+
+    // --- FUNCIONALIDADE DE DOWNLOAD DO YOUTUBE ---
+    document.getElementById('btn-yt-download').addEventListener('click', async () => {
+        const urlInput = document.getElementById('youtube-url');
+        const videoUrl = urlInput.value.trim();
+
+        if (!videoUrl) {
+            alert("Por favor, cole uma URL válida do YouTube.");
+            return;
+        }
+
+        importStatus.textContent = "Conectando ao servidor de conversão... Isso pode levar um minuto.";
+        importStatus.style.display = "block";
+
+        try {
+            // Usando uma API pública rotativa de conversão para MP3 (ex: Invidious / yt-download alternativas)
+            // Nota: APIs gratuitas externas podem oscilar. Essa estrutura captura o stream diretamente para blob.
+            const videoIdMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+            if(!videoIdMatch) {
+                throw new Error("Link do YouTube inválido.");
+            }
+            const videoId = videoIdMatch[1];
+            
+            // Endpoint de API pública para conversão direta
+            const apiUrl = `https://api.vexdwn.com/download?v=${videoId}&type=mp3`; 
+            
+            const response = await fetch(apiUrl);
+            if (!response.ok) throw new Error("Erro na resposta do servidor de download.");
+            
+            const jsonRes = await response.json();
+            if(!jsonRes.status || !jsonRes.url) throw new Error("Não foi possível gerar o arquivo de áudio.");
+
+            importStatus.textContent = "Baixando arquivo de áudio para o Player...";
+            
+            const fileResponse = await fetch(jsonRes.url);
+            const audioBlob = await fileResponse.blob();
+            
+            const tx = db.transaction('tracks', 'readwrite');
+            const store = tx.objectStore('tracks');
+            
+            const track = {
+                playlistId: activePlaylistId,
+                name: jsonRes.title || `YouTube Audio - ${videoId}`,
+                fileData: new File([audioBlob], `${videoId}.mp3`, { type: "audio/mp3" }),
+                order: playlistInMemory.length
+            };
+            
+            store.add(track);
+            tx.oncomplete = () => {
+                importStatus.style.display = "none";
+                urlInput.value = "";
+                alert("Música adicionada com sucesso!");
+                loadTracks();
+            };
+
+        } catch (err) {
+            importStatus.style.display = "none";
+            alert("Erro ao processar o vídeo: " + err.message + "\nTente novamente ou use outro link.");
+            console.error(err);
+        }
     });
 
     function playTrack(id) {
