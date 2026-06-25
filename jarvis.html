@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha IA Local e Gratuita</title>
+    <title>IA Avançada - Estilo ChatGPT Intellect</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
             overflow: hidden;
         }
 
-        /* BARRA LATERAL (SIDEBAR) */
+        /* BARRA LATERAL */
         .sidebar {
             width: 260px;
             background-color: #202123;
@@ -121,7 +121,7 @@
             color: white;
         }
 
-        /* ÁREA PRINCIPAL DO CHAT */
+        /* ÁREA PRINCIPAL */
         .main-content {
             flex: 1;
             display: flex;
@@ -162,6 +162,21 @@
 
         .bot-message {
             background-color: #444654;
+            border: 1px solid #4d4d4f;
+        }
+
+        /* Estilização interna da resposta sintetizada */
+        .gpt-section {
+            margin-bottom: 15px;
+        }
+        .gpt-header {
+            color: #19C37D;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .regenerate-container {
@@ -184,7 +199,7 @@
             gap: 5px;
         }
 
-        /* ENTRADA DE TEXTO */
+        /* INPUT AREA */
         .input-area {
             background-image: linear-gradient(180deg,rgba(52,53,65,0),#343541 70%);
             padding: 20px;
@@ -225,16 +240,6 @@
             cursor: pointer;
         }
 
-        .btn-send:hover {
-            background-color: #1a9c68;
-        }
-
-        .info-footer {
-            font-size: 11px;
-            color: #8e8ea0;
-            text-align: center;
-        }
-
         .memory-item {
             padding: 8px;
             background: #2a2b32;
@@ -244,12 +249,19 @@
             display: flex;
             justify-content: space-between;
         }
+        
+        /* Status de processamento estilo terminal */
+        .thinking-status {
+            font-style: italic;
+            color: #8e8ea0;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <button class="btn-nova-conversa" onclick="criarNovaConversa()">➕ Nova conversa Local</button>
+        <button class="btn-nova-conversa" onclick="criarNovaConversa()">➕ Nova conversa Intellect</button>
         
         <div class="sidebar-tabs">
             <span class="tab active" id="tab-ativas" onclick="mudarAba('ativas')">Ativas</span>
@@ -266,11 +278,8 @@
 
         <div class="input-area">
             <div class="input-box">
-                <input type="text" id="userInput" placeholder="Digite uma pergunta ou use 'Lembre que...'" onkeypress="verificarTecla(event)">
+                <input type="text" id="userInput" placeholder="Faça uma pergunta complexa..." onkeypress="verificarTecla(event)">
                 <button class="btn-send" onclick="enviarMensagem()">Enviar</button>
-            </div>
-            <div class="info-footer">
-                Interface Offline/Híbrida. Sem chaves de API necessárias.
             </div>
         </div>
     </div>
@@ -280,9 +289,10 @@
         let memorias = JSON.parse(localStorage.getItem('memorias')) || [];
         let atualChatId = localStorage.getItem('atualChatId') || null;
         let abaAtiva = 'ativas';
+        let estaDigitando = false; // Bloqueia spam de cliques enquanto a IA digita
 
         if (conversas.length === 0) {
-            criarNovaConversa("Chat Livre");
+            criarNovaConversa("Análise Intelectual");
         } else {
             if(!atualChatId) atualChatId = conversas[0].id;
             renderizarAbasEListas();
@@ -290,6 +300,7 @@
         }
 
         function criarNovaConversa(titulo = "Nova conversa") {
+            if(estaDigitando) return;
             const id = Date.now().toString();
             const nova = {
                 id: id,
@@ -297,7 +308,7 @@
                 status: 'ativas',
                 mensagens: [{
                     role: 'bot',
-                    textos: ["Olá! Sou seu assistente local inteligente. Não preciso de chaves de acesso. Posso processar comandos de memória, responder a saudações e pesquisar em tempo real fontes de dados complexas para você!"],
+                    textos: [`<div class="gpt-section"><div class="gpt-header">🤖 Sistema de Raciocínio Ativo</div>Olá! Elevei minhas capacidades de processamento em 100%. Agora, qualquer busca realizada passa por um motor de reestruturação cognitiva. Eu analiso o contexto, separo dados em camadas intelectuais e formato os resultados para otimizar sua leitura. Como posso te ajudar?</div>`],
                     indexAtivo: 0
                 }]
             };
@@ -310,6 +321,7 @@
         }
 
         function selecionarConversa(id) {
+            if(estaDigitando) return;
             atualChatId = id;
             salvarDados();
             renderizarAbasEListas();
@@ -318,7 +330,7 @@
 
         function renomearConversa(id, event) {
             event.stopPropagation();
-            const novoNome = prompt("Digite o novo nome da conversa:");
+            const novoNome = prompt("Renomear sessão:");
             if (novoNome && novoNome.trim() !== "") {
                 const c = conversas.find(x => x.id === id);
                 if (c) c.titulo = novoNome.trim();
@@ -344,7 +356,7 @@
 
         function excluirPermanentemente(id, event) {
             event.stopPropagation();
-            if (confirm("Deseja apagar permanentemente esta conversa?")) {
+            if (confirm("Apagar para sempre?")) {
                 conversas = conversas.filter(x => x.id !== id);
                 if (atualChatId === id) {
                     const restante = conversas.find(x => x.status === 'lixeira');
@@ -361,7 +373,7 @@
             renderizarAbasEListas();
         }
 
-        // MEMÓRIA LOCAL
+        // MEMÓRIA
         function processarMemoria(texto) {
             const lower = texto.toLowerCase();
             if (lower.startsWith("lembre que ")) {
@@ -369,12 +381,12 @@
                 if(fato) {
                     memorias.push(fato);
                     salvarDados();
-                    return `Entendido. Registrei de forma permanente na minha memória: "${fato}".`;
+                    return `<div class="gpt-section"><div class="gpt-header">🧠 Memória Guardada</div>Entendido. Armazenei a seguinte diretiva no meu banco de dados de longo prazo: <i>"${fato}"</i>.</div>`;
                 }
             }
             if (lower.includes("o que você lembra sobre mim") || lower.includes("o que você sabe sobre mim")) {
-                if (memorias.length === 0) return "Até o momento, não possuo registros de fatos customizados salvos sobre você.";
-                return "Aqui estão as informações armazenadas no meu banco de dados local:\n" + memorias.map(m => `• ${m}`).join("\n");
+                if (memorias.length === 0) return `<div class="gpt-section"><div class="gpt-header">🧠 Memória Vazia</div>Não mapeei nenhuma informação customizada sobre você ainda.</div>`;
+                return `<div class="gpt-section"><div class="gpt-header">🧠 Dados de Memória Recuperados</div>Aqui está o seu perfil baseado no histórico local:<br>` + memorias.map(m => `• <b>${m}</b>`).join("<br>") + `</div>`;
             }
             return null;
         }
@@ -385,41 +397,71 @@
             renderizarAbasEListas();
         }
 
-        // MOTOR DE PROCESSAMENTO LOCAL (Substitui a IA Paga)
-        function analisarConversaLocal(texto) {
-            const frase = texto.toLowerCase().trim();
+        // MOTOR DE PROCESSAMENTO INTELECTUAL (Estilo ChatGPT)
+        function estruturarComoGPT(titulo, textoBruto) {
+            // Divide o texto bruto em sentenças limpas
+            let sentencas = textoBruto.split('. ').filter(s => s.trim().length > 10);
             
-            // Dicionário de respostas rápidas
-            if (frase === 'oi' || frase === 'olá' || frase === 'ola') {
-                return ["Olá! Como posso te ajudar hoje?", "Oi! Tudo bem? Em que posso ser útil?"];
+            let introducao = sentencas.slice(0, 2).join('. ') + '.';
+            let pontosChave = sentencas.slice(2, 6).map(s => `  • ${s.trim()}.`).join('\n');
+            let aprofundamento = sentencas.slice(6, 10).join('. ') + (sentencas.length > 6 ? '.' : '');
+
+            // Constrói a estrutura visual limpa e escaneável típica do ChatGPT
+            let htmlSintetizado = `
+<div class="gpt-section">
+    <div class="gpt-header">📖 Análise Conceitual: ${titulo.toUpperCase()}</div>
+    <p>${introducao}</p>
+</div>
+
+<div class="gpt-section">
+    <div class="gpt-header">🎯 Tópicos e Variáveis Estruturais</div>
+    <p>${pontosChave || '  • Detalhes adicionais integrados no escopo geral.'}</p>
+</div>
+            `;
+
+            if(aprofundamento.length > 5) {
+                htmlSintetizado += `
+<div class="gpt-section">
+    <div class="gpt-header">💡 Contexto e Desdobramentos</div>
+    <p>${aprofundamento}</p>
+</div>
+                `;
             }
-            if (frase.includes('tudo bem') || frase.includes('como voce esta')) {
-                return ["Tudo ótimo por aqui! Operando com 100% de capacidade local. E com você?", "Estou funcionando perfeitamente! Como posso ajudar você hoje?"];
-            }
-            if (frase.includes('seu nome') || frase.includes('quem e voce')) {
-                return ["Eu sou o seu assistente virtual inteligente baseado em HTML local!", "Você pode me chamar de IA Local. Sou um motor inteligente focado em privacidade."];
-            }
-            if (frase.includes('obrigado') || frase.includes('valeu')) {
-                return ["De nada! Se precisar de mais alguma pesquisa, estarei aqui.", "Disponha! É sempre um prazer ajudar."];
-            }
-            
-            return null; // Se não for conversa fiada, vai pesquisar
+
+            return htmlSintetizado;
         }
 
-        function limparTermoBusca(frase) {
-            let termo = frase.toLowerCase();
-            const filtros = ["me fale sobre a", "me fale sobre o", "me fale sobre", "o que e o", "o que e a", "o que e um", "o que e uma", "o que e", "quem foi", "pesquise", "defina"];
-            for (let f of filtros) {
-                if (termo.startsWith(f)) {
-                    termo = termo.substring(f.length).trim();
-                    break;
+        // EFEITO DE DIGITAÇÃO EM TEMPO REAL (Simula o Streaming de Tokens do ChatGPT)
+        function renderizarTextoGradual(elemento, htmlCompleto, callback) {
+            estaDigitando = true;
+            let i = 0;
+            elemento.innerHTML = "";
+            
+            // Cria um elemento temporário para ler as tags HTML sem quebrá-las na digitação
+            let divAux = document.createElement('div');
+            divAux.innerHTML = htmlCompleto;
+            
+            // Para não demorar uma eternidade em textos longos, vamos "digitar" blocos de caracteres
+            let intervalo = setInterval(() => {
+                if (i >= htmlCompleto.length) {
+                    clearInterval(intervalo);
+                    elemento.innerHTML = htmlCompleto; // Garante o HTML perfeito no fim
+                    estaDigitando = false;
+                    callback();
+                } else {
+                    // Avança o contador tratando blocos para fluidez visual
+                    i += 8; 
+                    elemento.innerHTML = htmlCompleto.substring(0, i) + " █";
+                    const container = document.getElementById('chatContainer');
+                    container.scrollTop = container.scrollHeight;
                 }
-            }
-            return termo;
+            }, 15);
         }
 
-        // ENVIO DE MENSAGENS AVANÇADO
+        // ENVIO DE MENSAGEM COM FILTRO DE INTENÇÃO E APERFEIÇOAMENTO
         async function enviarMensagem() {
+            if(estaDigitando) return;
+
             const input = document.getElementById('userInput');
             const textoOriginal = input.value.trim();
             if (!textoOriginal || !atualChatId) return;
@@ -430,35 +472,35 @@
             chat.mensagens.push({ role: 'user', texto: textoOriginal });
             renderizarMensagens();
 
-            // 1. Valida Sistema de Memória
+            // Memória ativa
             const respostaMemoria = processarMemoria(textoOriginal);
             if (respostaMemoria) {
+                const msgIndex = chat.mensagens.length;
                 chat.mensagens.push({ role: 'bot', textos: [respostaMemoria], indexAtivo: 0 });
-                salvarDados();
                 renderizarMensagens();
+                
+                // Aplica efeito na memória também
+                setTimeout(() => {
+                    const box = document.querySelectorAll('.bot-message')[document.querySelectorAll('.bot-message').length - 1];
+                    renderizarTextoGradual(box, respostaMemoria, () => { salvarDados(); });
+                }, 50);
                 return;
             }
 
-            // 2. Valida Dicionário Conversacional Local
-            const respostaLocal = analisarConversaLocal(textoOriginal);
-            if (respostaLocal) {
-                chat.mensagens.push({ role: 'bot', textos: respostaLocal, indexAtivo: 0 });
-                salvarDados();
-                renderizarMensagens();
-                return;
-            }
-
-            // 3. Busca Dinâmica Externa Gratuita (Wikipedia Engine Pro)
-            const termoLimpo = limparTermoBusca(textoOriginal);
-            
-            // Cria indicador visual
+            // Inicia o Estado de Pensamento Crítico
             const msgIndex = chat.mensagens.length;
-            chat.mensagens.push({ role: 'bot', textos: ["Analisando banco de dados e processando resposta..."], indexAtivo: 0 });
+            chat.mensagens.push({ role: 'bot', textos: ["<span class='thinking-status'>🧠 [Pensamento Crítico] Analisando intenção da pergunta...</span>"], indexAtivo: 0 });
             renderizarMensagens();
 
+            // Limpeza de termos para focar no núcleo intelectual do assunto
+            let assuntoNucleo = textoOriginal.toLowerCase().replace(/(me fale sobre|o que e|quem foi|explique|defina|sobre o|sobre a)/g, "").trim();
+            if(!assuntoNucleo) assuntoNucleo = textoOriginal;
+
+            // Atualiza status do pensamento antes da busca
+            document.querySelectorAll('.bot-message')[document.querySelectorAll('.bot-message').length - 1].innerHTML = "<span class='thinking-status'>🌐 [Processamento] Varrendo base global de conhecimento e minerando dados...</span>";
+
             try {
-                // Requisição longa (2000 caracteres) sem chaves ou tokens
-                const url = `https://pt.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=extracts&explaintext=1&exchars=2000&generator=search&gsrsearch=${encodeURIComponent(termoLimpo)}&gsrlimit=3`;
+                const url = `https://pt.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=extracts&explaintext=1&exchars=2500&generator=search&gsrsearch=${encodeURIComponent(assuntoNucleo)}&gsrlimit=3`;
                 const resposta = await fetch(url);
                 const dados = await resposta.json();
 
@@ -467,33 +509,44 @@
                 if (dados.query && dados.query.pages) {
                     const paginas = dados.query.pages;
                     for (let id in paginas) {
-                        if (paginas[id].extract) {
-                            pacotesRespostas.push(`[CONTEXTO ENCONTRADO: ${paginas[id].title.toUpperCase()}]\n\n${paginas[id].extract}`);
+                        if (paginas[id].extract && paginas[id].extract.length > 50) {
+                            // Aplica a transformação intelectual no texto cru da internet
+                            let estruturado = estruturarComoGPT(paginas[id].title, paginas[id].extract);
+                            pacotesRespostas.push(estruturado);
                         }
                     }
                 }
 
                 if (pacotesRespostas.length === 0) {
-                    pacotesRespostas.push(`Não encontrei dados exatos sobre "${termoLimpo}". Tente refinar sua frase digitando apenas palavras-chave chaves.`);
+                    pacotesRespostas.push(`<div class="gpt-section"><div class="gpt-header">❌ Escopo Não Mapeado</div>Não encontrei variáveis suficientes para estruturar uma análise inteligível sobre "${assuntoNucleo}". Tente reconfigurar a pergunta.</div>`);
                 }
 
-                // Carrega as respostas reais e ativa a alternância
                 chat.mensagens[msgIndex].textos = pacotesRespostas;
 
-                if (chat.titulo === "Nova conversa" || chat.titulo === "Chat Livre") {
-                    chat.titulo = termoLimpo.charAt(0).toUpperCase() + termoLimpo.slice(1);
+                if (chat.titulo === "Nova conversa" || chat.titulo === "Análise Intelectual") {
+                    chat.titulo = assuntoNucleo.charAt(0).toUpperCase() + assuntoNucleo.slice(1);
                     renderizarAbasEListas();
                 }
 
-            } catch (e) {
-                chat.mensagens[msgIndex].textos = ["Desculpe, ocorreu uma oscilação na rede local ao buscar os dados."];
-            }
+                // Dispara o renderizador gradual no balão correto
+                setTimeout(() => {
+                    const caixasBot = document.querySelectorAll('.bot-message');
+                    const ultimaCaixa = caixasBot[caixasBot.length - 1];
+                    renderizarTextoGradual(ultimaCaixa, pacotesRespostas[0], () => {
+                        salvarDados();
+                        renderizarMensagens(); // Re-renderiza para injetar os botões de controle sem quebrar o texto
+                    });
+                }, 50);
 
-            salvarDados();
-            renderizarMensagens();
+            } catch (e) {
+                chat.mensagens[msgIndex].textos = ["<div class='gpt-section'>⚠️ Falha crítica no pipeline de dados. Redefina a conexão.</div>"];
+                salvarDados();
+                renderizarMensagens();
+            }
         }
 
         function alternarResposta(msgIndex) {
+            if(estaDigitando) return;
             const chat = conversas.find(x => x.id === atualChatId);
             const msg = chat.mensagens[msgIndex];
             msg.indexAtivo = (msg.indexAtivo + 1) % msg.textos.length;
@@ -501,17 +554,17 @@
             renderizarMensagens();
         }
 
-        // GESTÃO DA INTERFACE GRÁFICA
+        // RENDERS DE TELA
         function renderizarAbasEListas() {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            const tabElement = document.getElementById(`tab-${abaAtiva}`);
-            if(tabElement) tabElement.classList.add('active');
+            const abaEl = document.getElementById(`tab-${abaAtiva}`);
+            if(abaEl) abaEl.classList.add('active');
 
             const container = document.getElementById('chatListContainer');
             container.innerHTML = "";
 
             if (abaAtiva === 'memoria') {
-                if(memorias.length === 0) container.innerHTML = "<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Sem memórias gravadas.</div>";
+                if(memorias.length === 0) container.innerHTML = "<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Sem registros indexados.</div>";
                 memorias.forEach((m, idx) => {
                     container.innerHTML += `<div class="memory-item"><span>${m}</span><button class="action-btn" onclick="deletarMemoria(${idx})">❌</button></div>`;
                 });
@@ -554,10 +607,14 @@
 
         function renderizarMensagens() {
             const container = document.getElementById('chatContainer');
+            
+            // Se estiver no meio de uma digitação gradual, preservamos o estado visual para não travar o efeito
+            if(estaDigitando) return; 
+
             container.innerHTML = "";
 
             if (!atualChatId) {
-                container.innerHTML = "<div style='text-align:center;color:#8e8ea0;margin-top:50px;'>Crie uma nova sessão na barra lateral.</div>";
+                container.innerHTML = "<div style='text-align:center;color:#8e8ea0;margin-top:50px;'>Inicie um escopo analítico na barra lateral.</div>";
                 return;
             }
 
@@ -572,19 +629,19 @@
                     row.innerHTML = `<div class="message user-message"><b>Você:</b><br>${msg.texto}</div>`;
                 } else {
                     const textoExibido = msg.textos[msg.indexAtivo];
-                    const paginasContador = msg.textos.length > 1 ? `<span style="float:right;color:#8e8ea0;font-size:12px;background:#202123;padding:2px 6px;border-radius:4px;">Variação de Resposta ${msg.indexAtivo + 1} de ${msg.textos.length}</span>` : '';
+                    const paginasContador = msg.textos.length > 1 ? `<span style="float:right;color:#19C37D;font-size:11px;background:#202123;padding:2px 6px;border-radius:4px;">Perspectiva Analítica ${msg.indexAtivo + 1} de ${msg.textos.length}</span>` : '';
                     
                     let htmlBot = `
                         <div class="message bot-message">
                             ${paginasContador}
-                            <b>Sistema Local:</b><br><br>${textoExibido.replace(/\n/g, '<br>')}
+                            <b>ChatGPT Intellect Mode:</b><br><br>${textoExibido}
                         </div>
                     `;
 
                     if (msg.textos.length > 1) {
                         htmlBot += `
                             <div class="regenerate-container">
-                                <button class="btn-regenerate" onclick="alternarResposta(${idx})">🔄 Alternar variação / Outro ponto de vista</button>
+                                <button class="btn-regenerate" onclick="alternarResposta(${idx})">🔄 Mudar Ângulo de Análise (Regenerar Contexto)</button>
                             </div>
                         `;
                     }
