@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT Clone Pro - Respostas Avançadas</title>
+    <title>Minha IA Local e Gratuita</title>
     <style>
         * {
             margin: 0;
@@ -86,7 +86,6 @@
             justify-content: space-between;
             font-size: 14px;
             color: #ececf1;
-            background-color: transparent;
         }
 
         .chat-item:hover, .chat-item.active {
@@ -154,7 +153,7 @@
             line-height: 1.6;
             font-size: 15px;
             border-radius: 8px;
-            position: relative;
+            white-space: pre-wrap;
         }
 
         .user-message {
@@ -185,11 +184,7 @@
             gap: 5px;
         }
 
-        .btn-regenerate:hover {
-            background-color: #40414f;
-        }
-
-        /* BARRA DE ENTRADA DE TEXTO */
+        /* ENTRADA DE TEXTO */
         .input-area {
             background-image: linear-gradient(180deg,rgba(52,53,65,0),#343541 70%);
             padding: 20px;
@@ -210,7 +205,7 @@
             border: 1px solid #565869;
         }
 
-        input {
+        input[type="text"] {
             flex: 1;
             background: transparent;
             border: none;
@@ -237,6 +232,7 @@
         .info-footer {
             font-size: 11px;
             color: #8e8ea0;
+            text-align: center;
         }
 
         .memory-item {
@@ -253,7 +249,7 @@
 <body>
 
     <div class="sidebar">
-        <button class="btn-nova-conversa" onclick="criarNovaConversa()">➕ Nova conversa</button>
+        <button class="btn-nova-conversa" onclick="criarNovaConversa()">➕ Nova conversa Local</button>
         
         <div class="sidebar-tabs">
             <span class="tab active" id="tab-ativas" onclick="mudarAba('ativas')">Ativas</span>
@@ -270,10 +266,12 @@
 
         <div class="input-area">
             <div class="input-box">
-                <input type="text" id="userInput" placeholder="Faça uma pergunta detalhada aqui..." onkeypress="verificarTecla(event)">
+                <input type="text" id="userInput" placeholder="Digite uma pergunta ou use 'Lembre que...'" onkeypress="verificarTecla(event)">
                 <button class="btn-send" onclick="enviarMensagem()">Enviar</button>
             </div>
-            <div class="info-footer">Agora configurada para extrair respostas longas, dados técnicos e seções aprofundadas.</div>
+            <div class="info-footer">
+                Interface Offline/Híbrida. Sem chaves de API necessárias.
+            </div>
         </div>
     </div>
 
@@ -284,7 +282,7 @@
         let abaAtiva = 'ativas';
 
         if (conversas.length === 0) {
-            criarNovaConversa("Explorador Avançado");
+            criarNovaConversa("Chat Livre");
         } else {
             if(!atualChatId) atualChatId = conversas[0].id;
             renderizarAbasEListas();
@@ -299,7 +297,7 @@
                 status: 'ativas',
                 mensagens: [{
                     role: 'bot',
-                    textos: ["Olá! Sou seu assistente de pesquisa aprofundada. Pode me fazer perguntas complexas que buscarei os detalhes mais específicos disponíveis."],
+                    textos: ["Olá! Sou seu assistente local inteligente. Não preciso de chaves de acesso. Posso processar comandos de memória, responder a saudações e pesquisar em tempo real fontes de dados complexas para você!"],
                     indexAtivo: 0
                 }]
             };
@@ -363,6 +361,7 @@
             renderizarAbasEListas();
         }
 
+        // MEMÓRIA LOCAL
         function processarMemoria(texto) {
             const lower = texto.toLowerCase();
             if (lower.startsWith("lembre que ")) {
@@ -370,12 +369,12 @@
                 if(fato) {
                     memorias.push(fato);
                     salvarDados();
-                    return `Fato específico armazenado com sucesso na memória de longo prazo: "${fato}".`;
+                    return `Entendido. Registrei de forma permanente na minha memória: "${fato}".`;
                 }
             }
             if (lower.includes("o que você lembra sobre mim") || lower.includes("o que você sabe sobre mim")) {
-                if (memorias.length === 0) return "Minha base de dados de memória pessoal está vazia no momento.";
-                return "Fatos específicos recuperados sobre você:\n" + memorias.map(m => `• ${m}`).join("\n");
+                if (memorias.length === 0) return "Até o momento, não possuo registros de fatos customizados salvos sobre você.";
+                return "Aqui estão as informações armazenadas no meu banco de dados local:\n" + memorias.map(m => `• ${m}`).join("\n");
             }
             return null;
         }
@@ -386,31 +385,40 @@
             renderizarAbasEListas();
         }
 
-        // FUNÇÃO DE LIMPEZA FILTRADA (Deixa a busca focada e específica)
-        function extrairTermoEspecifico(frase) {
-            let termo = frase.toLowerCase();
+        // MOTOR DE PROCESSAMENTO LOCAL (Substitui a IA Paga)
+        function analisarConversaLocal(texto) {
+            const frase = texto.toLowerCase().trim();
             
-            // Lista de expressões comuns que "escondem" o assunto principal
-            const termosInuteis = [
-                "me fale sobre a", "me fale sobre o", "me fale sobre", 
-                "o que e uma", "o que e um", "o que e o", "o que e a", "o que e", 
-                "quem foi o", "quem foi a", "quem foi", "explique sobre",
-                "pesquise sobre", "o que significa", "fale especificamente sobre"
-            ];
+            // Dicionário de respostas rápidas
+            if (frase === 'oi' || frase === 'olá' || frase === 'ola') {
+                return ["Olá! Como posso te ajudar hoje?", "Oi! Tudo bem? Em que posso ser útil?"];
+            }
+            if (frase.includes('tudo bem') || frase.includes('como voce esta')) {
+                return ["Tudo ótimo por aqui! Operando com 100% de capacidade local. E com você?", "Estou funcionando perfeitamente! Como posso ajudar você hoje?"];
+            }
+            if (frase.includes('seu nome') || frase.includes('quem e voce')) {
+                return ["Eu sou o seu assistente virtual inteligente baseado em HTML local!", "Você pode me chamar de IA Local. Sou um motor inteligente focado em privacidade."];
+            }
+            if (frase.includes('obrigado') || frase.includes('valeu')) {
+                return ["De nada! Se precisar de mais alguma pesquisa, estarei aqui.", "Disponha! É sempre um prazer ajudar."];
+            }
+            
+            return null; // Se não for conversa fiada, vai pesquisar
+        }
 
-            // Remove acentos básicos para facilitar a checagem do filtro
-            let termoSemAcento = termo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-            for (let prefixo of termosInuteis) {
-                if (termoSemAcento.startsWith(prefixo)) {
-                    termo = termo.substring(prefixo.length).trim();
+        function limparTermoBusca(frase) {
+            let termo = frase.toLowerCase();
+            const filtros = ["me fale sobre a", "me fale sobre o", "me fale sobre", "o que e o", "o que e a", "o que e um", "o que e uma", "o que e", "quem foi", "pesquise", "defina"];
+            for (let f of filtros) {
+                if (termo.startsWith(f)) {
+                    termo = termo.substring(f.length).trim();
                     break;
                 }
             }
             return termo;
         }
 
-        // SISTEMA DE ENVIO COM AGREGADOR DE CONTEÚDO ESPECÍFICO
+        // ENVIO DE MENSAGENS AVANÇADO
         async function enviarMensagem() {
             const input = document.getElementById('userInput');
             const textoOriginal = input.value.trim();
@@ -422,6 +430,7 @@
             chat.mensagens.push({ role: 'user', texto: textoOriginal });
             renderizarMensagens();
 
+            // 1. Valida Sistema de Memória
             const respostaMemoria = processarMemoria(textoOriginal);
             if (respostaMemoria) {
                 chat.mensagens.push({ role: 'bot', textos: [respostaMemoria], indexAtivo: 0 });
@@ -430,13 +439,26 @@
                 return;
             }
 
-            // Limpa a pergunta para focar no assunto específico
-            const termoEspecifico = extrairTermoEspecifico(textoOriginal);
+            // 2. Valida Dicionário Conversacional Local
+            const respostaLocal = analisarConversaLocal(textoOriginal);
+            if (respostaLocal) {
+                chat.mensagens.push({ role: 'bot', textos: respostaLocal, indexAtivo: 0 });
+                salvarDados();
+                renderizarMensagens();
+                return;
+            }
+
+            // 3. Busca Dinâmica Externa Gratuita (Wikipedia Engine Pro)
+            const termoLimpo = limparTermoBusca(textoOriginal);
+            
+            // Cria indicador visual
+            const msgIndex = chat.mensagens.length;
+            chat.mensagens.push({ role: 'bot', textos: ["Analisando banco de dados e processando resposta..."], indexAtivo: 0 });
+            renderizarMensagens();
 
             try {
-                // ALTERAÇÕES DA API: Retirado o 'exintro' e adicionado 'exchars=2000' para trazer dados profundos
-                const url = `https://pt.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=extracts&explaintext=1&exchars=2000&generator=search&gsrsearch=${encodeURIComponent(termoEspecifico)}&gsrlimit=3`;
-                
+                // Requisição longa (2000 caracteres) sem chaves ou tokens
+                const url = `https://pt.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=extracts&explaintext=1&exchars=2000&generator=search&gsrsearch=${encodeURIComponent(termoLimpo)}&gsrlimit=3`;
                 const resposta = await fetch(url);
                 const dados = await resposta.json();
 
@@ -445,37 +467,26 @@
                 if (dados.query && dados.query.pages) {
                     const paginas = dados.query.pages;
                     for (let id in paginas) {
-                        if (paginas[id].extract && paginas[id].extract.trim() !== "") {
-                            // Formata o título e o texto de forma limpa e longa
-                            const tituloArtigo = paginas[id].title.toUpperCase();
-                            const textoArtigo = paginas[id].extract;
-                            pacotesRespostas.push(`[FONTE ESPECÍFICA: ${tituloArtigo}]\n\n${textoArtigo}`);
+                        if (paginas[id].extract) {
+                            pacotesRespostas.push(`[CONTEXTO ENCONTRADO: ${paginas[id].title.toUpperCase()}]\n\n${paginas[id].extract}`);
                         }
                     }
                 }
 
                 if (pacotesRespostas.length === 0) {
-                    pacotesRespostas.push(`Não localizei registros específicos para o termo de pesquisa atual ("${termoEspecifico}"). Tente refinar sua pergunta usando termos mais técnicos.`);
+                    pacotesRespostas.push(`Não encontrei dados exatos sobre "${termoLimpo}". Tente refinar sua frase digitando apenas palavras-chave chaves.`);
                 }
 
-                chat.mensagens.push({
-                    role: 'bot',
-                    textos: pacotesRespostas,
-                    indexAtivo: 0
-                });
+                // Carrega as respostas reais e ativa a alternância
+                chat.mensagens[msgIndex].textos = pacotesRespostas;
 
-                // Renomeia automaticamente o título da conversa com o assunto pesquisado
-                if (chat.titulo === "Nova conversa" || chat.titulo === "Explorador Avançado") {
-                    chat.titulo = termoEspecifico.charAt(0).toUpperCase() + termoEspecifico.slice(1);
+                if (chat.titulo === "Nova conversa" || chat.titulo === "Chat Livre") {
+                    chat.titulo = termoLimpo.charAt(0).toUpperCase() + termoLimpo.slice(1);
                     renderizarAbasEListas();
                 }
 
             } catch (e) {
-                chat.mensagens.push({
-                    role: 'bot',
-                    textos: ["Falha técnica de comunicação ao tentar coletar dados específicos."],
-                    indexAtivo: 0
-                });
+                chat.mensagens[msgIndex].textos = ["Desculpe, ocorreu uma oscilação na rede local ao buscar os dados."];
             }
 
             salvarDados();
@@ -490,30 +501,25 @@
             renderizarMensagens();
         }
 
+        // GESTÃO DA INTERFACE GRÁFICA
         function renderizarAbasEListas() {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`tab-${abaAtiva}`).classList.add('active');
+            const tabElement = document.getElementById(`tab-${abaAtiva}`);
+            if(tabElement) tabElement.classList.add('active');
 
             const container = document.getElementById('chatListContainer');
             container.innerHTML = "";
 
             if (abaAtiva === 'memoria') {
-                if(memorias.length === 0) container.innerHTML = "<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Nenhum dado salvo.</div>";
+                if(memorias.length === 0) container.innerHTML = "<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Sem memórias gravadas.</div>";
                 memorias.forEach((m, idx) => {
-                    container.innerHTML += `
-                        <div class="memory-item">
-                            <span>${m}</span>
-                            <button class="action-btn" onclick="deletarMemoria(${idx})">❌</button>
-                        </div>`;
+                    container.innerHTML += `<div class="memory-item"><span>${m}</span><button class="action-btn" onclick="deletarMemoria(${idx})">❌</button></div>`;
                 });
                 return;
             }
 
             const filtradas = conversas.filter(x => x.status === abaAtiva);
-
-            if(filtradas.length === 0) {
-                container.innerHTML = `<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Sem históricos aqui.</div>`;
-            }
+            if(filtradas.length === 0) container.innerHTML = "<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Vazio.</div>";
 
             filtradas.forEach(c => {
                 const isActive = c.id === atualChatId ? 'active' : '';
@@ -521,19 +527,19 @@
 
                 if (abaAtiva === 'ativas') {
                     botoesAcao = `
-                        <button class="action-btn" title="Renomear" onclick="renomearConversa('${c.id}', event)">✏️</button>
-                        <button class="action-btn" title="Arquivar" onclick="alterarStatusConversa('${c.id}', 'arquivadas', event)">📦</button>
-                        <button class="action-btn" title="Lixeira" onclick="alterarStatusConversa('${c.id}', 'lixeira', event)">🗑️</button>
+                        <button class="action-btn" onclick="renomearConversa('${c.id}', event)">✏️</button>
+                        <button class="action-btn" onclick="alterarStatusConversa('${c.id}', 'arquivadas', event)">📦</button>
+                        <button class="action-btn" onclick="alterarStatusConversa('${c.id}', 'lixeira', event)">🗑️</button>
                     `;
                 } else if (abaAtiva === 'arquivadas') {
                     botoesAcao = `
-                        <button class="action-btn" title="Desarquivar" onclick="alterarStatusConversa('${c.id}', 'ativas', event)">↩️</button>
-                        <button class="action-btn" title="Lixeira" onclick="alterarStatusConversa('${c.id}', 'lixeira', event)">🗑️</button>
+                        <button class="action-btn" onclick="alterarStatusConversa('${c.id}', 'ativas', event)">↩️</button>
+                        <button class="action-btn" onclick="alterarStatusConversa('${c.id}', 'lixeira', event)">🗑️</button>
                     `;
                 } else if (abaAtiva === 'lixeira') {
                     botoesAcao = `
-                        <button class="action-btn" title="Recuperar" onclick="alterarStatusConversa('${c.id}', 'ativas', event)">↩️</button>
-                        <button class="action-btn" title="Apagar para sempre" onclick="excluirPermanentemente('${c.id}', event)">❌</button>
+                        <button class="action-btn" onclick="alterarStatusConversa('${c.id}', 'ativas', event)">↩️</button>
+                        <button class="action-btn" onclick="excluirPermanentemente('${c.id}', event)">❌</button>
                     `;
                 }
 
@@ -551,7 +557,7 @@
             container.innerHTML = "";
 
             if (!atualChatId) {
-                container.innerHTML = "<div style='text-align:center;color:#8e8ea0;margin-top:50px;'>Abra ou crie um chat para interagir.</div>";
+                container.innerHTML = "<div style='text-align:center;color:#8e8ea0;margin-top:50px;'>Crie uma nova sessão na barra lateral.</div>";
                 return;
             }
 
@@ -566,25 +572,24 @@
                     row.innerHTML = `<div class="message user-message"><b>Você:</b><br>${msg.texto}</div>`;
                 } else {
                     const textoExibido = msg.textos[msg.indexAtivo];
-                    const paginasContador = msg.textos.length > 1 ? `<span style="float:right;color:#a8a8b3;font-size:12px;background:#202123;padding:2px 6px;border-radius:4px;">Resultado ${msg.indexAtivo + 1} de ${msg.textos.length}</span>` : '';
+                    const paginasContador = msg.textos.length > 1 ? `<span style="float:right;color:#8e8ea0;font-size:12px;background:#202123;padding:2px 6px;border-radius:4px;">Variação de Resposta ${msg.indexAtivo + 1} de ${msg.textos.length}</span>` : '';
                     
                     let htmlBot = `
                         <div class="message bot-message">
                             ${paginasContador}
-                            <b>IA Especializada:</b><br><br>${textoExibido.replace(/\n/g, '<br>')}
+                            <b>Sistema Local:</b><br><br>${textoExibido.replace(/\n/g, '<br>')}
                         </div>
                     `;
 
                     if (msg.textos.length > 1) {
                         htmlBot += `
                             <div class="regenerate-container">
-                                <button class="btn-regenerate" onclick="alternarResposta(${idx})">🔄 Alternar para outra vertente ou contexto</button>
+                                <button class="btn-regenerate" onclick="alternarResposta(${idx})">🔄 Alternar variação / Outro ponto de vista</button>
                             </div>
                         `;
                     }
                     row.innerHTML = htmlBot;
                 }
-
                 container.appendChild(row);
             });
 
