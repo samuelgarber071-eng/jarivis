@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT Clone Pro</title>
+    <title>ChatGPT Clone Pro - Respostas Avançadas</title>
     <style>
         * {
             margin: 0;
@@ -50,7 +50,6 @@
             background-color: #2a2b32;
         }
 
-        /* Abas de Navegação da Sidebar */
         .sidebar-tabs {
             display: flex;
             justify-content: space-between;
@@ -70,7 +69,6 @@
             font-weight: bold;
         }
 
-        /* Lista de Itens na Sidebar */
         .chat-list {
             flex: 1;
             overflow-y: auto;
@@ -167,7 +165,6 @@
             background-color: #444654;
         }
 
-        /* Botão de Outra Resposta (Regenerar) */
         .regenerate-container {
             max-width: 850px;
             width: 100%;
@@ -242,7 +239,6 @@
             color: #8e8ea0;
         }
 
-        /* Lista de Memórias Especial */
         .memory-item {
             padding: 8px;
             background: #2a2b32;
@@ -274,39 +270,36 @@
 
         <div class="input-area">
             <div class="input-box">
-                <input type="text" id="userInput" placeholder="Envie uma mensagem ou diga 'Lembre que...'" onkeypress="verificarTecla(event)">
+                <input type="text" id="userInput" placeholder="Faça uma pergunta detalhada aqui..." onkeypress="verificarTecla(event)">
                 <button class="btn-send" onclick="enviarMensagem()">Enviar</button>
             </div>
-            <div class="info-footer">Dica: Digite "Lembre que meu time é o Vasco" para testar a memória de longo prazo.</div>
+            <div class="info-footer">Agora configurada para extrair respostas longas, dados técnicos e seções aprofundadas.</div>
         </div>
     </div>
 
     <script>
-        // ESTADO GLOBAL DA APLICAÇÃO (Salvo no LocalStorage)
         let conversas = JSON.parse(localStorage.getItem('conversas')) || [];
         let memorias = JSON.parse(localStorage.getItem('memorias')) || [];
         let atualChatId = localStorage.getItem('atualChatId') || null;
-        let abaAtiva = 'ativas'; // ativas, arquivadas, lixeira, memoria
+        let abaAtiva = 'ativas';
 
-        // Inicialização
         if (conversas.length === 0) {
-            criarNovaConversa("Conversa Inicial");
+            criarNovaConversa("Explorador Avançado");
         } else {
             if(!atualChatId) atualChatId = conversas[0].id;
             renderizarAbasEListas();
             renderizarMensagens();
         }
 
-        // --- SISTEMA DE GERENCIAMENTO DE CONVERSAS ---
         function criarNovaConversa(titulo = "Nova conversa") {
             const id = Date.now().toString();
             const nova = {
                 id: id,
                 titulo: titulo,
-                status: 'ativas', // ativas, arquivadas, lixeira
+                status: 'ativas',
                 mensagens: [{
                     role: 'bot',
-                    textos: ["Olá! Sou seu assistente integrado à Wikipedia. Como posso ajudar?"],
+                    textos: ["Olá! Sou seu assistente de pesquisa aprofundada. Pode me fazer perguntas complexas que buscarei os detalhes mais específicos disponíveis."],
                     indexAtivo: 0
                 }]
             };
@@ -336,13 +329,11 @@
             }
         }
 
-        // --- SISTEMA DE ARQUIVAMENTO E LIXEIRA ---
         function alterarStatusConversa(id, novoStatus, event) {
             event.stopPropagation();
             const c = conversas.find(x => x.id === id);
             if (c) {
                 c.status = novoStatus;
-                // Se deletou/arquivou a conversa ativa, move para outra
                 if (atualChatId === id) {
                     const restante = conversas.find(x => x.status === abaAtiva);
                     atualChatId = restante ? restante.id : null;
@@ -372,7 +363,6 @@
             renderizarAbasEListas();
         }
 
-        // --- SISTEMA DE MEMÓRIA A LONGO PRAZO ---
         function processarMemoria(texto) {
             const lower = texto.toLowerCase();
             if (lower.startsWith("lembre que ")) {
@@ -380,12 +370,12 @@
                 if(fato) {
                     memorias.push(fato);
                     salvarDados();
-                    return `Entendido! Guardei isso na minha memória de longo prazo: "${fato}".`;
+                    return `Fato específico armazenado com sucesso na memória de longo prazo: "${fato}".`;
                 }
             }
             if (lower.includes("o que você lembra sobre mim") || lower.includes("o que você sabe sobre mim")) {
-                if (memorias.length === 0) return "Ainda não tenho fatos guardados sobre você. Use 'Lembre que [fato]' para me ensinar.";
-                return "Aqui está o que eu lembro sobre você:\n" + memorias.map(m => `• ${m}`).join("\n");
+                if (memorias.length === 0) return "Minha base de dados de memória pessoal está vazia no momento.";
+                return "Fatos específicos recuperados sobre você:\n" + memorias.map(m => `• ${m}`).join("\n");
             }
             return null;
         }
@@ -396,21 +386,43 @@
             renderizarAbasEListas();
         }
 
-        // --- SISTEMA DE ENVIO E OUTRA RESPOSTA (REGENERAR) ---
+        // FUNÇÃO DE LIMPEZA FILTRADA (Deixa a busca focada e específica)
+        function extrairTermoEspecifico(frase) {
+            let termo = frase.toLowerCase();
+            
+            // Lista de expressões comuns que "escondem" o assunto principal
+            const termosInuteis = [
+                "me fale sobre a", "me fale sobre o", "me fale sobre", 
+                "o que e uma", "o que e um", "o que e o", "o que e a", "o que e", 
+                "quem foi o", "quem foi a", "quem foi", "explique sobre",
+                "pesquise sobre", "o que significa", "fale especificamente sobre"
+            ];
+
+            // Remove acentos básicos para facilitar a checagem do filtro
+            let termoSemAcento = termo.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            for (let prefixo of termosInuteis) {
+                if (termoSemAcento.startsWith(prefixo)) {
+                    termo = termo.substring(prefixo.length).trim();
+                    break;
+                }
+            }
+            return termo;
+        }
+
+        // SISTEMA DE ENVIO COM AGREGADOR DE CONTEÚDO ESPECÍFICO
         async function enviarMensagem() {
             const input = document.getElementById('userInput');
-            const texto = input.value.trim();
-            if (!texto || !atualChatId) return;
+            const textoOriginal = input.value.trim();
+            if (!textoOriginal || !atualChatId) return;
 
             input.value = "";
             const chat = conversas.find(x => x.id === atualChatId);
             
-            // Adiciona a mensagem do usuário
-            chat.mensagens.push({ role: 'user', texto: texto });
+            chat.mensagens.push({ role: 'user', texto: textoOriginal });
             renderizarMensagens();
 
-            // Verifica se é um comando de memória
-            const respostaMemoria = processarMemoria(texto);
+            const respostaMemoria = processarMemoria(textoOriginal);
             if (respostaMemoria) {
                 chat.mensagens.push({ role: 'bot', textos: [respostaMemoria], indexAtivo: 0 });
                 salvarDados();
@@ -418,10 +430,13 @@
                 return;
             }
 
-            // Se for pesquisa comum, busca múltiplas respostas na Wikipedia para a função de regenerar
+            // Limpa a pergunta para focar no assunto específico
+            const termoEspecifico = extrairTermoEspecifico(textoOriginal);
+
             try {
-                // Buscamos até 3 resultados diferentes (gsrlimit=3)
-                const url = `https://pt.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=extracts&exintro=1&explaintext=1&generator=search&gsrsearch=${encodeURIComponent(texto)}&gsrlimit=3`;
+                // ALTERAÇÕES DA API: Retirado o 'exintro' e adicionado 'exchars=2000' para trazer dados profundos
+                const url = `https://pt.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=extracts&explaintext=1&exchars=2000&generator=search&gsrsearch=${encodeURIComponent(termoEspecifico)}&gsrlimit=3`;
+                
                 const resposta = await fetch(url);
                 const dados = await resposta.json();
 
@@ -429,28 +444,36 @@
 
                 if (dados.query && dados.query.pages) {
                     const paginas = dados.query.pages;
-                    // Organiza as respostas encontradas na busca
                     for (let id in paginas) {
                         if (paginas[id].extract && paginas[id].extract.trim() !== "") {
-                            pacotesRespostas.push(`[Opção de Busca: ${paginas[id].title}]\n${paginas[id].extract}`);
+                            // Formata o título e o texto de forma limpa e longa
+                            const tituloArtigo = paginas[id].title.toUpperCase();
+                            const textoArtigo = paginas[id].extract;
+                            pacotesRespostas.push(`[FONTE ESPECÍFICA: ${tituloArtigo}]\n\n${textoArtigo}`);
                         }
                     }
                 }
 
                 if (pacotesRespostas.length === 0) {
-                    pacotesRespostas.push(`Não encontrei resultados na internet para "${texto}". Tente outras palavras.`);
+                    pacotesRespostas.push(`Não localizei registros específicos para o termo de pesquisa atual ("${termoEspecifico}"). Tente refinar sua pergunta usando termos mais técnicos.`);
                 }
 
                 chat.mensagens.push({
                     role: 'bot',
-                    textos: pacotesRespostas, // Array de opções de resposta
+                    textos: pacotesRespostas,
                     indexAtivo: 0
                 });
+
+                // Renomeia automaticamente o título da conversa com o assunto pesquisado
+                if (chat.titulo === "Nova conversa" || chat.titulo === "Explorador Avançado") {
+                    chat.titulo = termoEspecifico.charAt(0).toUpperCase() + termoEspecifico.slice(1);
+                    renderizarAbasEListas();
+                }
 
             } catch (e) {
                 chat.mensagens.push({
                     role: 'bot',
-                    textos: ["Erro de conexão ao tentar buscar dados."],
+                    textos: ["Falha técnica de comunicação ao tentar coletar dados específicos."],
                     indexAtivo: 0
                 });
             }
@@ -462,15 +485,12 @@
         function alternarResposta(msgIndex) {
             const chat = conversas.find(x => x.id === atualChatId);
             const msg = chat.mensagens[msgIndex];
-            // Alterna de forma circular pelas respostas salvas do Wikipedia
             msg.indexAtivo = (msg.indexAtivo + 1) % msg.textos.length;
             salvarDados();
             renderizarMensagens();
         }
 
-        // --- RENDERIZADORES DE INTERFACE (UI) ---
         function renderizarAbasEListas() {
-            // Atualiza visual das abas
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById(`tab-${abaAtiva}`).classList.add('active');
 
@@ -478,7 +498,7 @@
             container.innerHTML = "";
 
             if (abaAtiva === 'memoria') {
-                if(memorias.length === 0) container.innerHTML = "<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Nenhuma memória salva.</div>";
+                if(memorias.length === 0) container.innerHTML = "<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Nenhum dado salvo.</div>";
                 memorias.forEach((m, idx) => {
                     container.innerHTML += `
                         <div class="memory-item">
@@ -489,11 +509,10 @@
                 return;
             }
 
-            // Filtra conversas com base na aba selecionada
             const filtradas = conversas.filter(x => x.status === abaAtiva);
 
             if(filtradas.length === 0) {
-                container.innerHTML = `<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Vazio.</div>`;
+                container.innerHTML = `<div style='font-size:12px;color:#8e8ea0;padding:10px;'>Sem históricos aqui.</div>`;
             }
 
             filtradas.forEach(c => {
@@ -532,7 +551,7 @@
             container.innerHTML = "";
 
             if (!atualChatId) {
-                container.innerHTML = "<div style='text-align:center;color:#8e8ea0;margin-top:50px;'>Selecione ou crie uma nova conversa na barra lateral.</div>";
+                container.innerHTML = "<div style='text-align:center;color:#8e8ea0;margin-top:50px;'>Abra ou crie um chat para interagir.</div>";
                 return;
             }
 
@@ -547,20 +566,19 @@
                     row.innerHTML = `<div class="message user-message"><b>Você:</b><br>${msg.texto}</div>`;
                 } else {
                     const textoExibido = msg.textos[msg.indexAtivo];
-                    const paginasContador = msg.textos.length > 1 ? `<span style="float:right;color:#8e8ea0;font-size:12px;">${msg.indexAtivo + 1}/${msg.textos.length}</span>` : '';
+                    const paginasContador = msg.textos.length > 1 ? `<span style="float:right;color:#a8a8b3;font-size:12px;background:#202123;padding:2px 6px;border-radius:4px;">Resultado ${msg.indexAtivo + 1} de ${msg.textos.length}</span>` : '';
                     
                     let htmlBot = `
                         <div class="message bot-message">
                             ${paginasContador}
-                            <b>IA:</b><br>${textoExibido.replace(/\n/g, '<br>')}
+                            <b>IA Especializada:</b><br><br>${textoExibido.replace(/\n/g, '<br>')}
                         </div>
                     `;
 
-                    // Adiciona o botão de Outra Resposta (Regenerar) caso existam mais opções de resposta vindas da busca
                     if (msg.textos.length > 1) {
                         htmlBot += `
                             <div class="regenerate-container">
-                                <button class="btn-regenerate" onclick="alternarResposta(${idx})">🔄 Ver outra resposta</button>
+                                <button class="btn-regenerate" onclick="alternarResposta(${idx})">🔄 Alternar para outra vertente ou contexto</button>
                             </div>
                         `;
                     }
@@ -573,7 +591,6 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // --- AUXILIARES ---
         function salvarDados() {
             localStorage.setItem('conversas', JSON.stringify(conversas));
             localStorage.setItem('memorias', JSON.stringify(memorias));
