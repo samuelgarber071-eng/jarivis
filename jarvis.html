@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Clone do ChatGPT</title>
+    <title>Meu Clone do ChatGPT com Busca</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,6 @@
             height: 100vh;
         }
 
-        /* Área do Chat */
         .chat-container {
             flex: 1;
             overflow-y: auto;
@@ -37,19 +36,16 @@
             line-height: 1.5;
         }
 
-        /* Mensagem do Usuário */
         .user-message {
             background-color: #202123;
             align-self: flex-end;
         }
 
-        /* Mensagem da IA */
         .bot-message {
             background-color: #444654;
             align-self: flex-start;
         }
 
-        /* Barra de Entrada de Texto */
         .input-area {
             background-color: #40414F;
             padding: 20px;
@@ -84,7 +80,6 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
         button:hover {
@@ -95,12 +90,12 @@
 <body>
 
     <div class="chat-container" id="chatContainer">
-        <div class="message bot-message">Olá! Eu sou a sua IA. Como posso te ajudar hoje?</div>
+        <div class="message bot-message">Olá! Pergunte-me sobre qualquer assunto (ex: "Gato", "Brasil", "Futebol") que eu vou pesquisar para você!</div>
     </div>
 
     <div class="input-area">
         <div class="input-box">
-            <input type="text" id="userInput" placeholder="Envie uma mensagem..." onkeypress="verificarTecla(event)">
+            <input type="text" id="userInput" placeholder="Digite um termo para pesquisar..." onkeypress="verificarTecla(event)">
             <button onclick="enviarMensagem()">Enviar</button>
         </div>
     </div>
@@ -109,19 +104,37 @@
         const chatContainer = document.getElementById('chatContainer');
         const userInput = document.getElementById('userInput');
 
-        function enviarMensagem() {
-            const texto = userInput.value.trim();
-            if (texto === "") return; // Não envia se estiver vazio
+        async function enviarMensagem() {
+            const termoBusca = userInput.value.trim();
+            if (termoBusca === "") return;
 
-            // 1. Adiciona a mensagem do usuário na tela
-            criarMensagem(texto, 'user-message');
-            userInput.value = ""; // Limpa o campo de texto
+            // 1. Mostra a mensagem do usuário
+            criarMensagem(termoBusca, 'user-message');
+            userInput.value = ""; 
 
-            // 2. Simula a resposta da IA após 1 segundo
-            setTimeout(() => {
-                const respostaDaIA = "Interessante! Eu sou apenas uma interface HTML por enquanto, mas logo serei mais inteligente.";
-                criarMensagem(respostaDaIA, 'bot-message');
-            }, 1000);
+            // 2. Cria um balão de "Pensando..." para a IA
+            const IdMensagemPensando = criarMensagem("Pesquisando na base de dados...", 'bot-message');
+
+            // 3. Faz a busca real na API da Wikipedia
+            try {
+                // Monta a URL de busca da Wikipedia em português
+                const url = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(termoBusca)}`;
+                
+                const resposta = await fetch(url);
+                
+                if (!resposta.ok) {
+                    throw new Error("Não encontrado");
+                }
+
+                const dados = await resposta.json();
+                
+                // Atualiza o texto do balão com o resumo encontrado
+                IdMensagemPensando.innerText = dados.extract;
+
+            } catch (erro) {
+                // Se a pesquisa falhar ou não achar o termo
+                IdMensagemPensando.innerText = `Desculpe, não consegui encontrar informações sobre "${termoBusca}". Tente digitar de forma mais simples (ex: em vez de "o que é um gato", digite apenas "gato").`;
+            }
         }
 
         function criarMensagem(texto, classe) {
@@ -130,11 +143,10 @@
             div.innerText = texto;
             chatContainer.appendChild(div);
             
-            // Rola o chat para baixo automaticamente
             chatContainer.scrollTop = chatContainer.scrollHeight;
+            return div; // Retorna o elemento para podermos modificá-lo depois
         }
 
-        // Permite enviar a mensagem apertando a tecla Enter
         function verificarTecla(event) {
             if (event.key === "Enter") {
                 enviarMensagem();
