@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitePlayer Ultra Pro v3</title>
+    <title>LitePlayer Ultra Pro v4</title>
     <style>
         :root {
             --bg-main: #0a0a0f;
@@ -45,50 +45,37 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            max-height: 92vh;
+            max-height: 95vh;
         }
 
         .player-header {
-            padding: 24px;
+            padding: 20px;
             background: linear-gradient(to bottom, #1e1e2f, var(--bg-card));
             border-bottom: 1px solid var(--border);
         }
 
-        /* Zona do YouTube */
+        /* Zona do Conversor YouTube Integrado */
         .youtube-zone {
             background: rgba(0, 0, 0, 0.4);
-            padding: 16px;
+            padding: 14px;
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             border: 1px solid var(--border);
+            text-align: center;
         }
         .youtube-zone h4 {
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--accent);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            margin-bottom: 8px;
         }
-        .youtube-input-group {
-            display: flex;
-            gap: 8px;
-        }
-        .youtube-input {
-            flex-grow: 1;
-            background: #09090d;
-            border: 1px solid var(--border);
-            padding: 10px 14px;
-            color: #fff;
-            font-size: 13px;
+        .converter-frame {
+            width: 100%;
+            height: 60px;
+            border: none;
             border-radius: 8px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .youtube-input:focus {
-            border-color: var(--accent);
+            background: #09090d;
         }
 
         .track-title {
@@ -218,7 +205,7 @@
         .info-box {
             font-size: 11px;
             color: var(--text-muted);
-            margin-top: 6px;
+            margin-top: 8px;
             line-height: 1.4;
         }
     </style>
@@ -228,12 +215,9 @@
 <div class="player-container">
     <div class="player-header">
         <div class="youtube-zone">
-            <h4>🎵 Importar Link do YouTube</h4>
-            <div class="youtube-input-group">
-                <input type="text" id="youtube-url" class="youtube-input" placeholder="Cole o link do vídeo/música...">
-                <button class="btn btn-accent btn-sm" id="btn-yt-download" style="flex-grow:0; width:85px;">Obter</button>
-            </div>
-            <div class="info-box" id="yt-info">Insira links tradicionais ou shorts. O arquivo será salvo direto no seu navegador.</div>
+            <h4>Converter Vídeo do YouTube</h4>
+            <iframe class="converter-frame" src="https://convert2mp3s.com/api/widget/mp3" allowtransparency="true" scrolling="no"></iframe>
+            <div class="info-box">Coloque o link dentro do campo acima, clique em converter e baixe o arquivo. Depois use o botão <strong>"Adicionar Músicas"</strong> abaixo para o salvar permanentemente aqui.</div>
         </div>
 
         <div class="track-title" id="current-title">Nenhuma música tocando</div>
@@ -298,7 +282,6 @@
     const volumeSlider = document.getElementById('volume-slider');
     const volumeLabel = document.getElementById('volume-label');
     const volumeIcon = document.getElementById('volume-icon');
-    const ytInfo = document.getElementById('yt-info');
     
     let activePlaylistId = null;
     let playlistInMemory = [];
@@ -449,81 +432,6 @@
             store.add(track);
         }
         tx.oncomplete = () => { loadTracks(); };
-    });
-
-    // --- SISTEMA ATUALIZADO DO YOUTUBE ---
-    document.getElementById('btn-yt-download').addEventListener('click', async () => {
-        const urlInput = document.getElementById('youtube-url');
-        const videoUrl = urlInput.value.trim();
-
-        if (!videoUrl) {
-            alert("Por favor, cole uma URL válida do YouTube.");
-            return;
-        }
-
-        // Tentar extrair o ID do vídeo
-        const videoIdMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{11})/);
-        if(!videoIdMatch) {
-            alert("Não foi possível reconhecer o link do YouTube. Verifique o link enviado.");
-            return;
-        }
-        const videoId = videoIdMatch[1];
-
-        importStatus.textContent = "Analisando o link do YouTube... Aguarde.";
-        importStatus.style.display = "block";
-        ytInfo.innerHTML = "⌛ Solicitando conversão ao servidor...";
-
-        try {
-            // Usando uma API de conversão estável (pública)
-            const apiUrl = `https://youtube-mp36.p.rapidapi.com/dl?id=${videoId}`;
-            
-            // Usamos um serviço de proxy cors/fetch aberto ou alternativo direto se possível.
-            // Para garantir o funcionamento sem chaves pagas, tentamos uma API direta de fallback:
-            const alternativeApi = `https://api.decentents.com/ytmp3?v=${videoId}`; 
-            
-            // Fazemos a chamada para o conversor público
-            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(alternativeApi)}`);
-            if(!res.ok) throw new Error("Falha de conexão.");
-            
-            const outerData = await res.json();
-            const data = JSON.parse(outerData.contents);
-
-            if (!data || !data.url) {
-                // Caso a API falhe, acionamos as instruções amigáveis imediatamente
-                throw new Error("O servidor público de download está sobrecarregado ou bloqueado temporariamente.");
-            }
-
-            importStatus.textContent = "Baixando o áudio para o seu player...";
-            ytInfo.innerHTML = "⚡ Transferindo dados de áudio...";
-
-            const fileResponse = await fetch(data.url);
-            const audioBlob = await fileResponse.blob();
-            
-            const tx = db.transaction('tracks', 'readwrite');
-            const store = tx.objectStore('tracks');
-            
-            const track = {
-                playlistId: activePlaylistId,
-                name: data.title || `YouTube Music (${videoId})`,
-                fileData: new File([audioBlob], `${videoId}.mp3`, { type: "audio/mp3" }),
-                order: playlistInMemory.length
-            };
-            
-            store.add(track);
-            tx.oncomplete = () => {
-                importStatus.style.display = "none";
-                ytInfo.innerHTML = "✅ Adicionado com sucesso!";
-                urlInput.value = "";
-                loadTracks();
-            };
-
-        } catch (err) {
-            importStatus.style.display = "none";
-            // INSTRUÇÃO DE AJUDA SE A API FALHAR:
-            ytInfo.innerHTML = `<span style="color:var(--error)">⚠️ Download direto indisponível no momento.</span><br>
-            <strong>Alternativa:</strong> Visite um site como o <em>y2mate.com</em> ou <em>savefrom.net</em>, baixe o MP3 do seu vídeo e use o botão <strong>"Adicionar Músicas"</strong> abaixo para colocá-lo aqui permanente!`;
-            console.error(err);
-        }
     });
 
     function playTrack(id) {
