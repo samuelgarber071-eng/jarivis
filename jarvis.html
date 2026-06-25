@@ -3,604 +3,425 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Estilo AIMP - 100% Permanent Offline</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        base: {
-                            dark: '#121418',
-                            medium: '#1E2127',
-                            light: '#2A2F38',
-                            text: '#E8EDF2'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Segoe UI', 'Roboto', 'sans-serif']
-                    }
-                }
-            }
+    <title>Modern Music Player</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #1e1e24, #111115);
+            --sidebar-bg: rgba(0, 0, 0, 0.6);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-color: #ffffff;
+            --accent-color: #1db954;
         }
-    </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .scrollbar-thin {
-                scrollbar-width: thin;
-                scrollbar-color: var(--cor-accent) #121418;
-            }
-            .scrollbar-thin::-webkit-scrollbar {
-                width: 6px;
-            }
-            .scrollbar-thin::-webkit-scrollbar-track {
-                background: #121418;
-            }
-            .scrollbar-thin::-webkit-scrollbar-thumb {
-                background-color: var(--cor-accent);
-                border-radius: 3px;
-                opacity: 0.7;
-            }
-            .btn-hover {
-                transition: all 0.2s ease;
-            }
-            .btn-hover:hover {
-                transform: translateY(-1px);
-                filter: brightness(1.15);
-            }
-            :root {
-                --cor-accent: #2E86AB;
-                --cor-accent-clara: #4298bd;
-                --cor-accent-escura: #1f6885;
-                --cor-texto: #E8EDF2;
-                --cor-sombra: rgba(46, 134, 171, 0.25);
-            }
-            .bg-accent { background-color: var(--cor-accent); }
-            .bg-accent-alpha { background-color: rgba(var(--cor-accent-rgb, "46, 134, 171"), 0.2); }
-            .text-accent { color: var(--cor-accent); }
-            .hover-accent:hover { color: var(--cor-accent); }
-            .transition-cores {
-                transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
-            }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            transition: background 0.8s ease;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+        }
+
+        .menu-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: scale(1.03);
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .playlist-list {
+            list-style: none;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+
+        .playlist-item {
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 5px;
+        }
+
+        .playlist-item:hover, .playlist-item.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            overflow-y: auto;
+        }
+
+        /* Player Central */
+        .player-container {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .album-cover {
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            object-fit: cover;
+            background: #333;
+        }
+
+        .track-info h2 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .track-info p {
+            color: #b3b3b3;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Music List / Manager */
+        .music-manager {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .music-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .music-table th, .music-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 5px;
+        }
+
+        /* Form Modal-like */
+        .form-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
-<body class="bg-base-dark text-base-text h-screen flex flex-col overflow-hidden transition-cores">
-    <header class="bg-base-medium px-4 py-2 flex items-center justify-between border-b border-base-light transition-cores">
-        <div class="flex items-center gap-2">
-            <i class="fa fa-music text-accent text-xl"></i>
-            <h1 class="text-lg font-semibold">Player AIMP Style</h1>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">🎛️ WAVEFLOW</div>
+        
+        <div class="menu-section">
+            <h3>Playlists</h3>
+            <ul class="playlist-list" id="playlistContainer">
+                <li class="playlist-item active" onclick="filterPlaylist('todas')">Todas as Músicas</li>
+                <li class="playlist-item" onclick="filterPlaylist('favoritas')">Favoritas</li>
+                <li class="playlist-item" onclick="filterPlaylist('arquivadas')">Arquivadas 📦</li>
+            </ul>
         </div>
-        <div class="flex gap-2">
-            <button id="btnBackup" class="btn-hover bg-accent px-3 py-1 rounded text-sm flex items-center gap-1 text-white">
-                <i class="fa fa-download"></i> Exportar Banco
-            </button>
-            <button id="btnRestore" class="btn-hover bg-green-600 px-3 py-1 rounded text-sm flex items-center gap-1 text-white">
-                <i class="fa fa-upload"></i> Importar Banco
-            </button>
-            <input type="file" id="inputRestore" accept=".json" class="hidden">
+
+        <div class="menu-section" style="margin-top:auto;">
+            <h3>Backup</h3>
+            <button class="btn btn-secondary" onclick="exportBackup()">📥 Exportar JSON</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">📤 Importar JSON</button>
+            <input type="file" id="importFile" class="hidden" accept=".json" onchange="importBackup(event)">
         </div>
-    </header>
-
-    <div class="flex flex-1 overflow-hidden">
-        <aside class="w-64 bg-base-medium border-r border-base-light p-3 flex flex-col gap-4 transition-cores">
-            <div>
-                <h3 class="text-sm uppercase text-gray-400 mb-2 font-medium">Biblioteca</h3>
-                <ul class="space-y-1">
-                    <li class="flex items-center gap-2 p-2 rounded bg-accent-alpha cursor-pointer transition-cores" data-tab="playlist">
-                        <i class="fa fa-list-ul"></i> Playlist
-                    </li>
-                    <li class="flex items-center gap-2 p-2 rounded hover:bg-base-light cursor-pointer transition-cores" data-tab="arquivos">
-                        <i class="fa fa-folder-open"></i> Arquivos (<span id="countArquivos">0</span>)
-                    </li>
-                    <li class="flex items-center gap-2 p-2 rounded hover:bg-base-light cursor-pointer transition-cores" data-tab="lixeira">
-                        <i class="fa fa-trash"></i> Lixeira
-                    </li>
-                </ul>
-            </div>
-
-            <div class="mt-auto flex flex-col items-center gap-3 p-3 bg-base-light rounded-lg transition-cores shadow-lg">
-                <div id="capaContainer" class="w-full aspect-square bg-base-medium rounded flex items-center justify-center overflow-hidden shadow-inner relative">
-                    <img id="capaImagem" src="" alt="Capa do Álbum" class="w-full h-full object-cover hidden">
-                    <i class="fa fa-music text-5xl text-gray-500 absolute"></i>
-                </div>
-                <p id="infoAlbum" class="text-xs text-center text-gray-400 truncate w-full">Nenhuma música selecionada</p>
-            </div>
-        </aside>
-
-        <main class="flex-1 flex flex-col overflow-hidden">
-            <div id="conteudo" class="flex-1 p-4 overflow-y-auto scrollbar-thin">
-                <div id="tab-playlist" class="tab-conteudo">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-lg font-semibold">Minha Playlist</h2>
-                        <label for="arquivosMusica" class="cursor-pointer btn-hover bg-accent px-3 py-1 rounded text-sm text-white">
-                            <i class="fa fa-plus mr-1"></i> Importar para o Disco do Player
-                        </label>
-                        <input type="file" id="arquivosMusica" accept=".mp3,.wav,.ogg,.flac,.m4a" multiple class="hidden">
-                    </div>
-                    <ul id="listaPlaylist" class="space-y-1"></ul>
-                </div>
-
-                <div id="tab-arquivos" class="tab-conteudo hidden">
-                    <h2 class="text-lg font-semibold mb-3">Gerenciador de Armazenamento Local</h2>
-                    <p class="text-xs text-gray-400 mb-4">Estas músicas estão fisicamente salvas dentro do banco de dados IndexedDB do seu navegador.</p>
-                    <ul id="listaArquivos" class="space-y-1"></ul>
-                </div>
-
-                <div id="tab-lixeira" class="tab-conteudo hidden">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-lg font-semibold">Lixeira</h2>
-                        <button id="esvaziarLixeira" class="btn-hover bg-red-600 px-3 py-1 rounded text-sm text-white">
-                            Esvaziar Tudo
-                        </button>
-                    </div>
-                    <ul id="listaLixeira" class="space-y-1"></ul>
-                </div>
-            </div>
-
-            <footer class="bg-base-medium border-t border-base-light p-4 transition-cores">
-                <audio id="audioPlayer" preload="metadata"></audio>
-                
-                <div class="flex flex-col gap-3">
-                    <div class="flex justify-between text-sm">
-                        <span id="tituloAtual" class="font-medium truncate max-w-md">Nenhuma música selecionada</span>
-                        <span id="tempoAtual">00:00 / 00:00</span>
-                    </div>
-
-                    <div class="w-full h-2 bg-base-light rounded-full overflow-hidden cursor-pointer transition-cores" id="barraProgresso">
-                        <div id="progresso" class="h-full bg-accent rounded-full w-0"></div>
-                    </div>
-
-                    <div class="flex items-center justify-center gap-6">
-                        <button id="btnAnterior" class="text-2xl hover-accent btn-hover transition-colors">
-                            <i class="fa fa-step-backward"></i>
-                        </button>
-                        <button id="btnPlay" class="text-4xl text-accent hover:brightness-110 btn-hover">
-                            <i class="fa fa-play-circle"></i>
-                        </button>
-                        <button id="btnProximo" class="text-2xl hover-accent btn-hover transition-colors">
-                            <i class="fa fa-step-forward"></i>
-                        </button>
-                        <div class="flex items-center gap-2 ml-6">
-                            <i class="fa fa-volume-up"></i>
-                            <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" class="w-28 accent-accent">
-                        </div>
-                    </div>
-                </div>
-            </footer>
-        </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
+    <div class="main-content">
+        
+        <div class="player-container" id="playerView">
+            <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=400" alt="Capa do Álbum" class="album-cover" id="currentCover">
+            <div class="track-info">
+                <h2 id="currentTitle">Nenhuma música selecionada</h2>
+                <p id="currentArtist">Selecione ou adicione uma faixa abaixo</p>
+                
+                <div class="controls">
+                    <button class="btn" onclick="togglePlay()">▶ Play / Pausar</button>
+                    <div class="volume-container">
+                        <span>🔊</span>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="80" oninput="updateVolume(this.value)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="music-manager">
+            <h3>Adicionar Nova Música</h3>
+            <div class="form-group" style="margin-top: 15px;">
+                <input type="text" id="trackTitle" placeholder="Nome da Música">
+                <input type="text" id="trackArtist" placeholder="Artista/Álbum">
+                <select id="trackColor">
+                    <option value="#2c3e50">Azul Escuro</option>
+                    <option value="#8e44ad">Roxo</option>
+                    <option value="#27ae60">Verde</option>
+                    <option value="#e74c3c">Vermelho</option>
+                    <option value="#d35400">Laranja</option>
+                </select>
+                <input type="text" id="trackCoverUrl" placeholder="URL da Capa (Opcional)">
+                <button class="btn" onclick="addMusic()">Adicionar</button>
+            </div>
+
+            <h3>Sua Biblioteca</h3>
+            <table class="music-table">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Artista/Álbum</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="musicTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
     <script>
-        const audioPlayer = document.getElementById('audioPlayer');
-        const arquivosMusica = document.getElementById('arquivosMusica');
-        const listaPlaylist = document.getElementById('listaPlaylist');
-        const listaArquivos = document.getElementById('listaArquivos');
-        const listaLixeira = document.getElementById('listaLixeira');
-        const btnPlay = document.getElementById('btnPlay');
-        const btnAnterior = document.getElementById('btnAnterior');
-        const btnProximo = document.getElementById('btnProximo');
-        const tituloAtual = document.getElementById('tituloAtual');
-        const tempoAtual = document.getElementById('tempoAtual');
-        const barraProgresso = document.getElementById('barraProgresso');
-        const progresso = document.getElementById('progresso');
-        const volume = document.getElementById('volume');
-        const btnBackup = document.getElementById('btnBackup');
-        const btnRestore = document.getElementById('btnRestore');
-        const inputRestore = document.getElementById('inputRestore');
-        const esvaziarLixeira = document.getElementById('esvaziarLixeira');
-        const capaImagem = document.getElementById('capaImagem');
-        const infoAlbum = document.getElementById('infoAlbum');
-        const countArquivos = document.getElementById('countArquivos');
-        const colorThief = new ColorThief();
+        // Banco de dados inicial padrão (Salvo no LocalStorage)
+        let library = JSON.parse(localStorage.getItem('waveflow_db')) || [
+            { id: 1, title: "Midnight City", artist: "M83", color: "#8e44ad", cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=400", archived: false, playlist: "favoritas" },
+            { id: 2, title: "Ocean Drive", artist: "Duke Dumont", color: "#2c3e50", cover: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=400", archived: false, playlist: "todas" }
+        ];
 
-        let db = null;
-        let playlist = [];
-        let lixeira = [];
-        let indiceAtual = 0;
-        let blobUrlAtual = null; // Guardar referência para limpar memória anterior
+        let currentFilter = 'todas';
 
-        // --- SISTEMA INDEXEDDB (ARMAZENAMENTO OFFLINE REAL) ---
-        const request = indexedDB.open("AimpPlayerOfflineDB", 1);
-        request.onupgradeneeded = (e) => {
-            db = e.target.result;
-            if (!db.objectStoreNames.contains("musicas")) {
-                db.createObjectStore("musicas", { keyPath: "id", autoIncrement: true });
-            }
-        };
-        request.onsuccess = (e) => {
-            db = e.target.result;
-            carregarDadosDoBanco();
-        };
+        // Renderiza a tabela de músicas baseado nos filtros
+        function renderLibrary() {
+            const tbody = document.getElementById('musicTableBody');
+            tbody.innerHTML = '';
 
-        function carregarDadosDoBanco() {
-            const transaction = db.transaction(["musicas"], "readonly");
-            const store = transaction.objectStore("musicas");
-            const requestAll = store.getAll();
-
-            requestAll.onsuccess = () => {
-                const todas = requestAll.result;
-                playlist = todas.filter(m => !m.naoLixeira);
-                lixeira = todas.filter(m => m.naoLixeira);
-                renderizarPlaylist();
-                renderizarLixeira();
-            };
-        }
-
-        function salvarMusicaNoBanco(objetoMusica, callback) {
-            const transaction = db.transaction(["musicas"], "readwrite");
-            const store = transaction.objectStore("musicas");
-            const req = store.add(objetoMusica);
-            req.onsuccess = (e) => {
-                objetoMusica.id = e.target.result;
-                callback(objetoMusica);
-            };
-        }
-
-        function atualizarStatusLixeiraNoBanco(id, estaNaLixeira) {
-            const transaction = db.transaction(["musicas"], "readwrite");
-            const store = transaction.objectStore("musicas");
-            const req = store.get(id);
-            req.onsuccess = () => {
-                const data = req.result;
-                if(data) {
-                    data.naoLixeira = estaNaLixeira;
-                    store.put(data);
-                }
-            };
-        }
-
-        function deletarDefinitivoNoBanco(id) {
-            const transaction = db.transaction(["musicas"], "readwrite");
-            const store = transaction.objectStore("musicas");
-            store.delete(id);
-        }
-
-        // --- ENFIM REGRAS DO PLAYER ---
-        function formatarTempo(segundos) {
-            if(isNaN(segundos)) return "00:00";
-            const min = Math.floor(segundos / 60);
-            const seg = Math.floor(segundos % 60);
-            return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
-        }
-
-        function lerMetadados(arquivo, callback) {
-            jsmediatags.read(arquivo, {
-                onSuccess: function(tag) {
-                    let capa = null;
-                    if (tag.tags.picture) {
-                        const data = tag.tags.picture.data;
-                        const format = tag.tags.picture.format;
-                        let base64String = "";
-                        for (let i = 0; i < data.length; i++) {
-                            base64String += String.fromCharCode(data[i]);
-                        }
-                        capa = `data:${format};base64,${window.btoa(base64String)}`;
-                    }
-                    const titulo = tag.tags.title || arquivo.name.replace(/\.[^/.]+$/, "");
-                    const artista = tag.tags.artist || "Artista Desconhecido";
-                    const album = tag.tags.album || "Álbum Desconhecido";
-                    callback({ titulo, artista, album, capa });
-                },
-                onError: function() {
-                    callback({
-                        titulo: arquivo.name.replace(/\.[^/.]+$/, ""),
-                        artista: "Artista Desconhecido",
-                        album: "Álbum Desconhecido",
-                        capa: null
-                    });
-                }
+            const filtered = library.filter(track => {
+                if (currentFilter === 'arquivadas') return track.archived === true;
+                if (currentFilter === 'favoritas') return track.playlist === 'favoritas' && !track.archived;
+                return !track.archived; // 'todas' pega as não arquivadas
             });
+
+            filtered.forEach(track => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="cursor:pointer; font-weight:600;" onclick="playTrack(${track.id})">▶ ${track.title}</td>
+                    <td>${track.artist}</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-small" onclick="toggleArchive(${track.id})">
+                            ${track.archived ? 'Desarquivar' : '📦 Arquivar'}
+                        </button>
+                        <button class="btn btn-secondary btn-small" style="background:rgba(231,76,60,0.2)" onclick="deleteTrack(${track.id})">❌ Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            localStorage.setItem('waveflow_db', JSON.stringify(library));
         }
 
-        function aplicarCoresDaCapa(urlImagem) {
-            if (!urlImagem) {
-                resetarCores();
+        // Toca a música e muda dinamicamente o fundo baseado na cor configurada no álbum
+        function playTrack(id) {
+            const track = library.find(t => t.id === id);
+            if (!track) return;
+
+            document.getElementById('currentTitle').innerText = track.title;
+            document.getElementById('currentArtist').innerText = track.artist;
+            if(track.cover) document.getElementById('currentCover').src = track.cover;
+
+            // Transição de cor de fundo dinâmica baseada no álbum
+            document.body.style.background = `linear-gradient(135deg, ${track.color}, #111115)`;
+        }
+
+        // Adiciona nova música
+        function addMusic() {
+            const title = document.getElementById('trackTitle').value;
+            const artist = document.getElementById('trackArtist').value;
+            const color = document.getElementById('trackColor').value;
+            let cover = document.getElementById('trackCoverUrl').value;
+
+            if (!title || !artist) {
+                alert('Por favor, preencha Título e Artista.');
                 return;
             }
-            const img = new Image();
-            img.onload = () => {
+
+            if (!cover) cover = "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=400";
+
+            const newTrack = {
+                id: Date.now(),
+                title,
+                artist,
+                color,
+                cover,
+                archived: false,
+                playlist: 'todas'
+            };
+
+            library.push(newTrack);
+            renderLibrary();
+
+            // Limpa os campos
+            document.getElementById('trackTitle').value = '';
+            document.getElementById('trackArtist').value = '';
+            document.getElementById('trackCoverUrl').value = '';
+        }
+
+        // Arquivar / Desarquivar
+        function toggleArchive(id) {
+            const track = library.find(t => t.id === id);
+            if (track) {
+                track.archived = !track.archived;
+                renderLibrary();
+            }
+        }
+
+        // Excluir Definitivamente
+        function deleteTrack(id) {
+            if(confirm("Tem certeza que deseja deletar permanentemente esta música?")) {
+                library = library.filter(t => t.id !== id);
+                renderLibrary();
+            }
+        }
+
+        // Filtrar pelas abas laterais
+        function filterPlaylist(type) {
+            currentFilter = type;
+            document.querySelectorAll('.playlist-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            renderLibrary();
+        }
+
+        // Feedback visual do volume
+        function updateVolume(val) {
+            console.log(`Volume alterado para: ${val}%`);
+            // Aqui controlaria um elemento <audio> real se houvesse streaming de som implícito
+        }
+
+        function togglePlay() {
+            alert("Modo de reprodução simulado! Adicione arquivos de áudio reais para tocar som.");
+        }
+
+        // SISTEMA DE BACKUP (JSON)
+        function exportBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(library, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "waveflow_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importBackup(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
                 try {
-                    const cor = colorThief.getColor(img);
-                    const [r, g, b] = cor;
-                    const brilho = (r * 299 + g * 587 + b * 114) / 1000;
-                    
-                    const fator = brilho < 120 ? 1.4 : 0.9;
-                    const nr = Math.min(255, Math.round(r * fator));
-                    const ng = Math.min(255, Math.round(g * fator));
-                    const nb = Math.min(255, Math.round(b * fator));
-
-                    document.documentElement.style.setProperty('--cor-accent', `rgb(${nr}, ${ng}, ${nb})`);
-                    document.documentElement.style.setProperty('--cor-accent-rgb', `${nr}, ${ng}, ${nb}`);
-                    document.documentElement.style.setProperty('--cor-accent-escura', `rgb(${Math.max(0, nr-40)}, ${Math.max(0, ng-40)}, ${Math.max(0, nb-40)})`);
-                    document.documentElement.style.setProperty('--cor-accent-clara', `rgb(${Math.min(255, nr+30)}, ${Math.min(255, ng+30)}, ${Math.min(255, nb+30)})`);
-                } catch (e) { resetarCores(); }
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        library = importedData;
+                        renderLibrary();
+                        alert("Backup importado com sucesso!");
+                    } else {
+                        alert("Formato de arquivo inválido.");
+                    }
+                } catch (err) {
+                    alert("Erro ao ler o arquivo de backup.");
+                }
             };
-            img.onerror = resetarCores;
-            img.src = urlImagem;
+            fileReader.readAsText(event.target.files[0]);
         }
 
-        function resetarCores() {
-            document.documentElement.style.setProperty('--cor-accent', '#2E86AB');
-            document.documentElement.style.setProperty('--cor-accent-rgb', '46, 134, 171');
-            document.documentElement.style.setProperty('--cor-accent-escura', '#1f6885');
-            document.documentElement.style.setProperty('--cor-accent-clara', '#4298bd');
-        }
-
-        function renderizarPlaylist() {
-            listaPlaylist.innerHTML = playlist.length ? '' : '<li class="text-gray-400 text-center py-10">Nenhuma música adicionada ainda</li>';
-            listaArquivos.innerHTML = playlist.length ? '' : '<li class="text-gray-400 text-center py-10">Nenhum bloco detectado</li>';
-            countArquivos.textContent = playlist.length;
-
-            playlist.forEach((musica, i) => {
-                const li = document.createElement('li');
-                li.className = `p-3 rounded flex justify-between items-center cursor-pointer hover:bg-base-light transition-cores ${i === indiceAtual ? 'bg-accent-alpha border-l-4 border-accent' : ''}`;
-                li.innerHTML = `
-                    <div class="flex items-center gap-3 flex-1 overflow-hidden" onclick="tocarMusica(${i})">
-                        <div class="w-10 h-10 rounded bg-base-medium flex items-center justify-center overflow-hidden flex-shrink-0">
-                            ${musica.capa ? `<img src="${musica.capa}" class="w-full h-full object-cover">` : `<i class="fa fa-music text-gray-500"></i>`}
-                        </div>
-                        <div class="overflow-hidden">
-                            <p class="font-medium truncate text-sm">${musica.titulo}</p>
-                            <p class="text-xs text-gray-400 truncate">${musica.artista} • ${musica.album}</p>
-                        </div>
-                    </div>
-                    <button onclick="moverParaLixeira(${i})" class="text-red-500 hover:text-red-400 text-lg p-2 flex-shrink-0">
-                        <i class="fa fa-trash-o"></i>
-                    </button>
-                `;
-                listaPlaylist.appendChild(li);
-
-                const liArq = document.createElement('li');
-                liArq.className = 'p-2 rounded bg-base-light text-xs text-gray-400 flex justify-between items-center';
-                liArq.innerHTML = `<span>ID #${musica.id || 'N/A'}: ${musica.titulo} (${(musica.arquivoBlob.size/1024/1024).toFixed(2)} MB)</span> <span class="text-green-500">OK (Salvo no Banco)</span>`;
-                listaArquivos.appendChild(liArq);
-            });
-        }
-
-        function renderizarLixeira() {
-            listaLixeira.innerHTML = lixeira.length ? '' : '<li class="text-gray-400 text-center py-10">Lixeira vazia</li>';
-            lixeira.forEach((musica, i) => {
-                const li = document.createElement('li');
-                li.className = 'p-3 rounded flex justify-between items-center hover:bg-base-light transition-cores';
-                li.innerHTML = `
-                    <div class="flex items-center gap-3 flex-1 overflow-hidden">
-                        <div class="w-9 h-9 rounded bg-base-medium flex items-center justify-center overflow-hidden flex-shrink-0">
-                            ${musica.capa ? `<img src="${musica.capa}" class="w-full h-full object-cover">` : `<i class="fa fa-music text-gray-500"></i>`}
-                        </div>
-                        <div class="overflow-hidden">
-                            <p class="font-medium truncate text-sm">${musica.titulo}</p>
-                            <p class="text-xs text-gray-400 truncate">${musica.artista}</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-3 flex-shrink-0">
-                        <button onclick="restaurarDaLixeira(${i})" class="text-green-500 hover:text-green-400 text-lg p-1">
-                            <i class="fa fa-undo"></i>
-                        </button>
-                        <button onclick="excluirDefinitivamente(${i})" class="text-red-500 hover:text-red-400 text-lg p-1">
-                            <i class="fa fa-times"></i>
-                        </button>
-                    </div>
-                `;
-                listaLixeira.appendChild(li);
-            });
-        }
-
-        function tocarMusica(indice) {
-            if (!playlist[indice]) return;
-            indiceAtual = indice;
-            const musica = playlist[indice];
-            
-            // Limpa a URL temporária anterior da memória RAM para evitar vazamento
-            if (blobUrlAtual) URL.revokeObjectURL(blobUrlAtual);
-
-            // Transforma o arquivo binário armazenado do IndexedDB em URL de reprodução instantânea
-            blobUrlAtual = URL.createObjectURL(musica.arquivoBlob);
-            audioPlayer.src = blobUrlAtual;
-            tituloAtual.textContent = `${musica.titulo} - ${musica.artista}`;
-            infoAlbum.textContent = `${musica.artista} • ${musica.album}`;
-            
-            if (musica.capa) {
-                capaImagem.src = musica.capa;
-                capaImagem.classList.remove('hidden');
-                document.querySelector('#capaContainer > i').classList.add('hidden');
-                aplicarCoresDaCapa(musica.capa);
-            } else {
-                capaImagem.classList.add('hidden');
-                document.querySelector('#capaContainer > i').classList.remove('hidden');
-                resetarCores();
-            }
-
-            audioPlayer.play();
-            btnPlay.innerHTML = '<i class="fa fa-pause-circle"></i>';
-            renderizarPlaylist();
-        }
-
-        function moverParaLixeira(indice) {
-            const removida = playlist.splice(indice, 1)[0];
-            removida.naoLixeira = true;
-            lixeira.push(removida);
-            atualizarStatusLixeiraNoBanco(removida.id, true);
-
-            if (indice === indiceAtual) {
-                audioPlayer.pause();
-                tituloAtual.textContent = 'Nenhuma música selecionada';
-                infoAlbum.textContent = 'Nenhuma música selecionada';
-                capaImagem.classList.add('hidden');
-                document.querySelector('#capaContainer > i').classList.remove('hidden');
-                btnPlay.innerHTML = '<i class="fa fa-play-circle"></i>';
-                resetarCores();
-            }
-            renderizarPlaylist();
-            renderizarLixeira();
-        }
-
-        function restaurarDaLixeira(indice) {
-            const restaurada = lixeira.splice(indice, 1)[0];
-            restaurada.naoLixeira = false;
-            playlist.push(restaurada);
-            atualizarStatusLixeiraNoBanco(restaurada.id, false);
-            renderizarPlaylist();
-            renderizarLixeira();
-        }
-
-        function excluirDefinitivamente(indice) {
-            const removida = lixeira.splice(indice, 1)[0];
-            deletarDefinitivoNoBanco(removida.id);
-            renderizarLixeira();
-        }
-
-        arquivosMusica.addEventListener('change', (e) => {
-            const arquivos = e.target.files;
-            Array.from(arquivos).forEach(arquivo => {
-                lerMetadados(arquivo, dados => {
-                    const novaMusica = {
-                        arquivoBlob: arquivo, // Guarda o arquivo binário real inteiro aqui dentro!
-                        titulo: dados.titulo,
-                        artista: dados.artista,
-                        album: dados.album,
-                        capa: dados.capa,
-                        naoLixeira: false
-                    };
-                    salvarMusicaNoBanco(novaMusica, (itemSalvo) => {
-                        playlist.push(itemSalvo);
-                        renderizarPlaylist();
-                    });
-                });
-            });
-        });
-
-        btnPlay.addEventListener('click', () => {
-            if (playlist.length === 0) return;
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-                btnPlay.innerHTML = '<i class="fa fa-pause-circle"></i>';
-            } else {
-                audioPlayer.pause();
-                btnPlay.innerHTML = '<i class="fa fa-play-circle"></i>';
-            }
-        });
-
-        btnAnterior.addEventListener('click', () => {
-            if (playlist.length === 0) return;
-            indiceAtual = (indiceAtual - 1 + playlist.length) % playlist.length;
-            tocarMusica(indiceAtual);
-        });
-
-        btnProximo.addEventListener('click', () => {
-            if (playlist.length === 0) return;
-            indiceAtual = (indiceAtual + 1) % playlist.length;
-            tocarMusica(indiceAtual);
-        });
-
-        audioPlayer.addEventListener('timeupdate', () => {
-            const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100 || 0;
-            progresso.style.width = `${percent}%`;
-            tempoAtual.textContent = `${formatarTempo(audioPlayer.currentTime)} / ${formatarTempo(audioPlayer.duration || 0)}`;
-        });
-
-        audioPlayer.addEventListener('ended', () => btnProximo.click());
-
-        barraProgresso.addEventListener('click', (e) => {
-            const largura = barraProgresso.clientWidth;
-            const posicao = e.offsetX;
-            const tempo = (posicao / largura) * audioPlayer.duration;
-            if (!isNaN(tempo)) audioPlayer.currentTime = tempo;
-        });
-
-        volume.addEventListener('input', () => audioPlayer.volume = volume.value);
-
-        document.querySelectorAll('[data-tab]').forEach(aba => {
-            aba.addEventListener('click', () => {
-                document.querySelectorAll('.tab-conteudo').forEach(t => t.classList.add('hidden'));
-                document.getElementById(`tab-${aba.dataset.tab}`).classList.remove('hidden');
-                document.querySelectorAll('[data-tab]').forEach(a => a.classList.remove('bg-accent-alpha'));
-                aba.classList.add('bg-accent-alpha');
-            });
-        });
-
-        // Backup do Banco em Texto Base64
-        btnBackup.addEventListener('click', () => {
-            const transaction = db.transaction(["musicas"], "readonly");
-            const store = transaction.objectStore("musicas");
-            store.getAll().onsuccess = (e) => {
-                const todas = e.target.result;
-                const promessas = todas.map(m => {
-                    return new Promise(resolve => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            resolve({
-                                titulo: m.titulo,
-                                artista: m.artista,
-                                album: m.album,
-                                capa: m.capa,
-                                naoLixeira: m.naoLixeira,
-                                arquivoBase64: reader.result
-                            });
-                        };
-                        reader.readAsDataURL(m.arquivoBlob);
-                    });
-                });
-                Promise.all(promessas).then(dadosExportados => {
-                    const blob = new Blob([JSON.stringify(dadosExportados)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `aimp-database-full.json`;
-                    a.click();
-                });
-            };
-        });
-
-        btnRestore.addEventListener('click', () => inputRestore.click());
-        inputRestore.addEventListener('change', (e) => {
-            const arquivo = e.target.files[0];
-            if (!arquivo) return;
-            const leitor = new FileReader();
-            leitor.onload = (evt) => {
-                try {
-                    const lista = JSON.parse(evt.target.result);
-                    const tx = db.transaction(["musicas"], "readwrite");
-                    const store = tx.objectStore("musicas");
-                    
-                    lista.forEach(item => {
-                        // Converter Base64 de volta para Blob físico
-                        const partes = item.arquivoBase64.split(',');
-                        const byteString = atob(partes[1]);
-                        const mimeString = partes[0].split(':')[1].split(';')[0];
-                        const ab = new ArrayBuffer(byteString.length);
-                        const ia = new Uint8Array(ab);
-                        for (let i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); }
-                        const blob = new Blob([ab], { type: mimeString });
-
-                        store.add({
-                            arquivoBlob: blob,
-                            titulo: item.titulo,
-                            artista: item.artista,
-                            album: item.album,
-                            capa: item.capa,
-                            naoLixeira: item.naoLixeira
-                        });
-                    });
-                    tx.oncomplete = () => {
-                        alert('Banco de dados importado e restaurado!');
-                        carregarDadosDoBanco();
-                    };
-                } catch { alert('Arquivo inválido!'); }
-            };
-            leitor.readAsText(arquivo);
-        });
-
-        esvaziarLixeira.addEventListener('click', () => {
-            if (confirm('Deseja esvaziar a lixeira definitivamente?')) {
-                lixeira.forEach(m => deletarDefinitivoNoBanco(m.id));
-                lixeira = [];
-                renderizarLixeira();
-            }
-        });
+        // Inicialização
+        renderLibrary();
     </script>
 </body>
 </html>
