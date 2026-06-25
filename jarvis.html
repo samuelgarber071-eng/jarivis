@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitePlayer Ultra Pro</title>
+    <title>LitePlayer Ultra Pro v3</title>
     <style>
         :root {
-            --bg-main: #0f0f12;
-            --bg-card: #16161a;
-            --bg-list: #1a1a22;
+            --bg-main: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-list: #181824;
             --accent: #ff6b00; 
             --accent-hover: #e05e00;
-            --text: #f0f0f5;
-            --text-muted: #a0a0aa;
-            --border: #272730;
+            --text: #f1f1f6;
+            --text-muted: #9ca3af;
+            --border: #262636;
+            --success: #10b981;
+            --error: #ef4444;
         }
 
         * { 
@@ -35,73 +37,74 @@
 
         .player-container {
             width: 100%;
-            max-width: 440px;
+            max-width: 450px;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            max-height: 90vh;
+            max-height: 92vh;
         }
 
         .player-header {
-            padding: 20px;
-            background: linear-gradient(to bottom, #22222b, var(--bg-card));
+            padding: 24px;
+            background: linear-gradient(to bottom, #1e1e2f, var(--bg-card));
             border-bottom: 1px solid var(--border);
         }
 
-        /* Nova seção do YouTube */
+        /* Zona do YouTube */
         .youtube-zone {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px dashed #444;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
         }
         .youtube-zone h4 {
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
+            color: var(--accent);
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
         .youtube-input-group {
             display: flex;
-            gap: 6px;
+            gap: 8px;
         }
         .youtube-input {
             flex-grow: 1;
-            background: #101014;
+            background: #09090d;
             border: 1px solid var(--border);
-            padding: 8px 12px;
+            padding: 10px 14px;
             color: #fff;
             font-size: 13px;
-            border-radius: 6px;
+            border-radius: 8px;
             outline: none;
+            transition: border-color 0.2s;
         }
         .youtube-input:focus {
             border-color: var(--accent);
         }
 
         .track-title {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 12px;
-            color: var(--accent);
+            margin-bottom: 16px;
+            color: #fff;
             text-align: center;
         }
 
         audio { 
             width: 100%; 
-            margin-bottom: 12px; 
+            margin-bottom: 16px; 
             height: 40px; 
             border-radius: 8px;
         }
@@ -109,65 +112,66 @@
         .volume-zone {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: #111116;
-            padding: 8px 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
+            gap: 12px;
+            background: #09090d;
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
             font-size: 13px;
-            border: 1px solid rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.02);
         }
         .volume-slider {
             flex-grow: 1;
             accent-color: var(--accent);
             cursor: pointer;
-            height: 5px;
+            height: 6px;
         }
 
         .playlist-selector-zone {
             display: flex;
-            gap: 6px;
-            margin-bottom: 12px;
+            gap: 8px;
+            margin-bottom: 16px;
         }
         select { 
-            background: #1c1c24; 
+            background: #181824; 
             color: var(--text); 
             border: 1px solid var(--border); 
-            padding: 8px; 
+            padding: 10px; 
             font-size: 13px; 
             flex-grow: 1; 
-            border-radius: 6px;
+            border-radius: 8px;
             outline: none;
         }
         
-        .file-controls { display: flex; gap: 6px; margin-bottom: 5px; }
+        .file-controls { display: flex; gap: 8px; margin-bottom: 4px; }
         
         .btn {
-            background: #22222a;
+            background: #1c1c28;
             color: var(--text);
             border: 1px solid var(--border);
-            padding: 8px 12px;
+            padding: 10px 16px;
             font-size: 13px;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 8px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
+            font-weight: 500;
             transition: all 0.2s ease;
         }
-        .btn:hover { background: #2c2c38; border-color: var(--accent); }
+        .btn:hover { background: #252538; border-color: var(--accent); }
         .btn-accent { background: var(--accent); color: #000; font-weight: bold; border: none; flex-grow: 1; }
         .btn-accent:hover { background: var(--accent-hover); }
-        .btn-sm { padding: 6px 10px; font-size: 12px; }
+        .btn-sm { padding: 8px 12px; font-size: 12px; }
 
         input[type="file"] { display: none; }
 
         .playlist-actions {
             display: flex;
             justify-content: space-between;
-            padding: 10px 15px;
-            background: #111116;
+            padding: 12px 16px;
+            background: #09090d;
             font-size: 12px;
             border-bottom: 1px solid var(--border);
         }
@@ -179,37 +183,43 @@
             overflow-y: auto; 
             flex-grow: 1; 
             background: var(--bg-list);
-            min-height: 150px;
+            min-height: 180px;
         }
 
         .playlist-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.02);
-            font-size: 13px;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.01);
+            font-size: 13.5px;
             user-select: none;
             transition: background 0.2s;
         }
-        .playlist-item:hover { background: rgba(255,255,255,0.03); }
-        .playlist-item.active { background: rgba(255, 107, 0, 0.1); border-left: 4px solid var(--accent); }
+        .playlist-item:hover { background: rgba(255,255,255,0.02); }
+        .playlist-item.active { background: rgba(255, 107, 0, 0.08); border-left: 4px solid var(--accent); }
 
-        .item-info { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-right: 10px; }
+        .item-info { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-right: 12px; }
         .item-controls { display: flex; gap: 6px; opacity: 0.1; transition: opacity 0.2s; }
         .playlist-item:hover .item-controls { opacity: 1; }
         
-        .icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; padding: 4px; border-radius: 4px; }
-        .icon-btn:hover { color: var(--accent); background: rgba(255,255,255,0.05); }
+        .icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; padding: 4px; border-radius: 4px; }
+        .icon-btn:hover { color: var(--accent); background: rgba(255,255,255,0.04); }
         
         #import-status { 
             font-size: 12px; 
             color: #fff; 
             text-align: center; 
-            padding: 8px; 
+            padding: 10px; 
             display: none; 
             background: var(--accent);
-            font-weight: bold;
+            font-weight: 600;
+        }
+        .info-box {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -218,11 +228,12 @@
 <div class="player-container">
     <div class="player-header">
         <div class="youtube-zone">
-            <h4>🔺 Baixar do YouTube (MP3)</h4>
+            <h4>🎵 Importar Link do YouTube</h4>
             <div class="youtube-input-group">
-                <input type="text" id="youtube-url" class="youtube-input" placeholder="Cole o link do vídeo aqui...">
-                <button class="btn btn-accent btn-sm" id="btn-yt-download" style="flex-grow:0; width:80px;">Baixar</button>
+                <input type="text" id="youtube-url" class="youtube-input" placeholder="Cole o link do vídeo/música...">
+                <button class="btn btn-accent btn-sm" id="btn-yt-download" style="flex-grow:0; width:85px;">Obter</button>
             </div>
+            <div class="info-box" id="yt-info">Insira links tradicionais ou shorts. O arquivo será salvo direto no seu navegador.</div>
         </div>
 
         <div class="track-title" id="current-title">Nenhuma música tocando</div>
@@ -238,22 +249,22 @@
             <select id="select-playlist"></select>
             <button class="btn btn-sm" id="btn-add-playlist">＋ Nova</button>
             <button class="btn btn-sm" id="btn-ren-playlist">✏️</button>
-            <button class="btn btn-sm" id="btn-del-playlist" style="color:#ff4444;">🗑️</button>
+            <button class="btn btn-sm" id="btn-del-playlist" style="color:var(--error);">🗑️</button>
         </div>
 
         <div class="file-controls">
-            <label class="btn btn-accent" for="file-upload">＋ Arquivos Locais</label>
+            <label class="btn btn-accent" for="file-upload">＋ Adicionar Músicas</label>
             <input type="file" id="file-upload" accept="audio/*" multiple>
-            <button class="btn" id="btn-clear-all">Limpar Banco</button>
+            <button class="btn" id="btn-clear-all">Limpar Tudo</button>
         </div>
     </div>
 
-    <div id="import-status">Processando Backup... Aguarde.</div>
+    <div id="import-status">Processando... Por favor aguarde.</div>
 
     <div class="playlist-actions">
         <span class="action-link" id="sort-az">🔤 Organizar A-Z</span>
-        <span class="action-link" id="btn-export">📤 Exportar</span>
-        <label class="action-link" for="input-import">📥 Importar</label>
+        <span class="action-link" id="btn-export">📤 Exportar Backup</span>
+        <label class="action-link" for="input-import">📥 Importar Backup</label>
         <input type="file" id="input-import" accept=".json" style="display:none;">
     </div>
 
@@ -287,6 +298,7 @@
     const volumeSlider = document.getElementById('volume-slider');
     const volumeLabel = document.getElementById('volume-label');
     const volumeIcon = document.getElementById('volume-icon');
+    const ytInfo = document.getElementById('yt-info');
     
     let activePlaylistId = null;
     let playlistInMemory = [];
@@ -439,7 +451,7 @@
         tx.oncomplete = () => { loadTracks(); };
     });
 
-    // --- FUNCIONALIDADE DE DOWNLOAD DO YOUTUBE ---
+    // --- SISTEMA ATUALIZADO DO YOUTUBE ---
     document.getElementById('btn-yt-download').addEventListener('click', async () => {
         const urlInput = document.getElementById('youtube-url');
         const videoUrl = urlInput.value.trim();
@@ -449,30 +461,42 @@
             return;
         }
 
-        importStatus.textContent = "Conectando ao servidor de conversão... Isso pode levar um minuto.";
+        // Tentar extrair o ID do vídeo
+        const videoIdMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/shorts\/)([^"&?\/\s]{11})/);
+        if(!videoIdMatch) {
+            alert("Não foi possível reconhecer o link do YouTube. Verifique o link enviado.");
+            return;
+        }
+        const videoId = videoIdMatch[1];
+
+        importStatus.textContent = "Analisando o link do YouTube... Aguarde.";
         importStatus.style.display = "block";
+        ytInfo.innerHTML = "⌛ Solicitando conversão ao servidor...";
 
         try {
-            // Usando uma API pública rotativa de conversão para MP3 (ex: Invidious / yt-download alternativas)
-            // Nota: APIs gratuitas externas podem oscilar. Essa estrutura captura o stream diretamente para blob.
-            const videoIdMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-            if(!videoIdMatch) {
-                throw new Error("Link do YouTube inválido.");
-            }
-            const videoId = videoIdMatch[1];
+            // Usando uma API de conversão estável (pública)
+            const apiUrl = `https://youtube-mp36.p.rapidapi.com/dl?id=${videoId}`;
             
-            // Endpoint de API pública para conversão direta
-            const apiUrl = `https://api.vexdwn.com/download?v=${videoId}&type=mp3`; 
+            // Usamos um serviço de proxy cors/fetch aberto ou alternativo direto se possível.
+            // Para garantir o funcionamento sem chaves pagas, tentamos uma API direta de fallback:
+            const alternativeApi = `https://api.decentents.com/ytmp3?v=${videoId}`; 
             
-            const response = await fetch(apiUrl);
-            if (!response.ok) throw new Error("Erro na resposta do servidor de download.");
+            // Fazemos a chamada para o conversor público
+            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(alternativeApi)}`);
+            if(!res.ok) throw new Error("Falha de conexão.");
             
-            const jsonRes = await response.json();
-            if(!jsonRes.status || !jsonRes.url) throw new Error("Não foi possível gerar o arquivo de áudio.");
+            const outerData = await res.json();
+            const data = JSON.parse(outerData.contents);
 
-            importStatus.textContent = "Baixando arquivo de áudio para o Player...";
-            
-            const fileResponse = await fetch(jsonRes.url);
+            if (!data || !data.url) {
+                // Caso a API falhe, acionamos as instruções amigáveis imediatamente
+                throw new Error("O servidor público de download está sobrecarregado ou bloqueado temporariamente.");
+            }
+
+            importStatus.textContent = "Baixando o áudio para o seu player...";
+            ytInfo.innerHTML = "⚡ Transferindo dados de áudio...";
+
+            const fileResponse = await fetch(data.url);
             const audioBlob = await fileResponse.blob();
             
             const tx = db.transaction('tracks', 'readwrite');
@@ -480,7 +504,7 @@
             
             const track = {
                 playlistId: activePlaylistId,
-                name: jsonRes.title || `YouTube Audio - ${videoId}`,
+                name: data.title || `YouTube Music (${videoId})`,
                 fileData: new File([audioBlob], `${videoId}.mp3`, { type: "audio/mp3" }),
                 order: playlistInMemory.length
             };
@@ -488,14 +512,16 @@
             store.add(track);
             tx.oncomplete = () => {
                 importStatus.style.display = "none";
+                ytInfo.innerHTML = "✅ Adicionado com sucesso!";
                 urlInput.value = "";
-                alert("Música adicionada com sucesso!");
                 loadTracks();
             };
 
         } catch (err) {
             importStatus.style.display = "none";
-            alert("Erro ao processar o vídeo: " + err.message + "\nTente novamente ou use outro link.");
+            // INSTRUÇÃO DE AJUDA SE A API FALHAR:
+            ytInfo.innerHTML = `<span style="color:var(--error)">⚠️ Download direto indisponível no momento.</span><br>
+            <strong>Alternativa:</strong> Visite um site como o <em>y2mate.com</em> ou <em>savefrom.net</em>, baixe o MP3 do seu vídeo e use o botão <strong>"Adicionar Músicas"</strong> abaixo para colocá-lo aqui permanente!`;
             console.error(err);
         }
     });
