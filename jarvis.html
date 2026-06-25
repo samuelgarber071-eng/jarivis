@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Clone do ChatGPT - Modo Wikipédia</title>
+    <title>Meu ChatGPT Inteligente com Busca</title>
     <style>
         * {
             margin: 0;
@@ -20,6 +20,7 @@
             height: 100vh;
         }
 
+        /* Área do Chat */
         .chat-container {
             flex: 1;
             overflow-y: auto;
@@ -36,16 +37,19 @@
             line-height: 1.5;
         }
 
+        /* Mensagem do Usuário */
         .user-message {
             background-color: #202123;
             align-self: flex-end;
         }
 
+        /* Mensagem da IA */
         .bot-message {
             background-color: #444654;
             align-self: flex-start;
         }
 
+        /* Barra de Entrada de Texto */
         .input-area {
             background-color: #40414F;
             padding: 20px;
@@ -80,6 +84,7 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
+            transition: background 0.2s;
         }
 
         button:hover {
@@ -90,12 +95,12 @@
 <body>
 
     <div class="chat-container" id="chatContainer">
-        <div class="message bot-message">Olá! Eu sou sua IA conectada à Wikipédia. Pode me perguntar sobre qualquer assunto (ex: "Quem foi Albert Einstein?" ou "Como funciona a fotossíntese?").</div>
+        <div class="message bot-message">Olá! Pode me fazer perguntas ou pedir explicações (ex: "O que é HTML?", "Quem foi Einstein?", "Como funciona o Sol?"). Eu vou pesquisar na internet para te responder!</div>
     </div>
 
     <div class="input-area">
         <div class="input-box">
-            <input type="text" id="userInput" placeholder="Pergunte algo para a Wikipédia..." onkeypress="verificarTecla(event)">
+            <input type="text" id="userInput" placeholder="Faça uma pergunta..." onkeypress="verificarTecla(event)">
             <button onclick="enviarMensagem()">Enviar</button>
         </div>
     </div>
@@ -108,52 +113,58 @@
             const textoUsuario = userInput.value.trim();
             if (textoUsuario === "") return;
 
-            // 1. Mostra a mensagem do usuário
+            // 1. Mostra a mensagem que você digitou
             criarMensagem(textoUsuario, 'user-message');
             userInput.value = ""; 
 
-            // 2. Balão de "Pensando..."
-            const balaoIA = criarMensagem("Pesquisando na Wikipédia...", 'bot-message');
+            // 2. Cria o balão de "Pensando..."
+            const balaoIA = criarMensagem("Pesquisando na internet, por favor aguarde...", 'bot-message');
 
+            // 3. Faz a busca real inteligente na API da Wikipedia
             try {
-                // ETAPA 1: Pesquisar termos relacionados na Wikipédia
-                const urlBusca = `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(textoUsuario)}&format=json&origin=*`;
-                const respostaBusca = await fetch(urlBusca);
-                const dadosBusca = await respostaBusca.json();
+                // Esta URL pesquisa pelo texto e já traz o resumo explicativo (extract) do melhor resultado
+                const url = `https://pt.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=extracts&exintro=1&explaintext=1&generator=search&gsrsearch=${encodeURIComponent(textoUsuario)}&gsrlimit=1`;
+                
+                const resposta = await fetch(url);
+                const dados = await resposta.json();
 
-                // Se não encontrar nenhum resultado na busca
-                if (!dadosBusca.query.search || dadosBusca.query.search.length === 0) {
-                    balaoIA.innerText = `Não encontrei nenhum artigo na Wikipédia sobre "${textoUsuario}". Tente usar outras palavras!`;
-                    return;
+                // Verifica se a Wikipedia encontrou alguma página correspondente
+                if (!dados.query || !dados.query.pages) {
+                    throw new Error("Não encontrado");
                 }
 
-                // Pega o título do primeiro artigo mais relevante encontrado
-                const tituloArtigo = dadosBusca.query.search[0].title;
+                // A API da Wikipedia retorna os dados dentro do ID da página. Pegamos o primeiro resultado disponível:
+                const paginas = dados.query.pages;
+                const primeiroId = Object.keys(paginas)[0];
+                
+                if (primeiroId === "-1") {
+                    throw new Error("Não encontrado");
+                }
 
-                // ETAPA 2: Buscar o resumo desse artigo específico
-                const urlResumo = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tituloArtigo)}`;
-                const respostaResumo = await fetch(urlResumo);
-                const dadosResumo = await respostaResumo.json();
+                const resumoFinal = paginas[primeiroId].extract;
 
-                // Exibe o resumo na tela
-                balaoIA.innerText = dadosResumo.extract;
+                // 4. Substitui o "Pensando..." pela resposta real encontrada
+                balaoIA.innerText = resumoFinal;
 
             } catch (erro) {
-                balaoIA.innerText = "Ops! Tive um problema de conexão ao acessar a Wikipédia. Tente novamente mais tarde.";
-                console.error(erro);
+                // Mensagem amigável caso não encontre nada ou falhe a conexão
+                balaoIA.innerText = `Desculpe, pesquisei mas não encontrei informações claras sobre o que você pediu. Tente reformular a pergunta usando palavras-chave mais simples!`;
             }
         }
 
+        // Função para colocar a mensagem na tela
         function criarMensagem(texto, classe) {
             const div = document.createElement('div');
             div.className = `message ${classe}`;
             div.innerText = texto;
             chatContainer.appendChild(div);
             
+            // Força a barra de rolagem a ir para o final do chat
             chatContainer.scrollTop = chatContainer.scrollHeight;
-            return div;
+            return div; 
         }
 
+        // Envia ao apertar Enter
         function verificarTecla(event) {
             if (event.key === "Enter") {
                 enviarMensagem();
