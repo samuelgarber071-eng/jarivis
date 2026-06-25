@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibePlayer Pro - Sidebar Edition</title>
+    <title>VibePlayer Pro - Sidebar Edition Fixed</title>
     <style>
         :root {
             --bg-sidebar: rgba(20, 20, 28, 0.75);
@@ -39,7 +39,7 @@
             -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
             overflow: hidden;
             display: table;
             table-layout: fixed;
@@ -394,9 +394,9 @@
             </div>
             
             <div class="playback-buttons">
-                <button class="control-btn" id="ctrl-prev" title="Anterior">⏮</button>
+                <button class="control-btn" id="ctrl-prev" title="Anterior">Anterior ⏮</button>
                 <button class="control-btn play-pause" id="ctrl-play" title="Play/Pause">▶</button>
-                <button class="control-btn" id="ctrl-next" title="Próxima">⏭</button>
+                <button class="control-btn" id="ctrl-next" title="Próxima">⏭ Próxima</button>
             </div>
 
             <div class="volume-zone">
@@ -410,8 +410,9 @@
 </div>
 
 <script>
-    const DB_NAME = 'LitePlayerProDB';
-    const DB_VERSION = 3; // Versão incrementada para suportar a propriedade "cover" nas tracks
+    // Alterado o nome do banco de dados para forçar o recarregamento correto da estrutura com suporte a capas
+    const DB_NAME = 'VibePlayerSidebarDatabaseV1';
+    const DB_VERSION = 1; 
     let db;
 
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -501,13 +502,47 @@
         document.getElementById('player-container').style.boxShadow = `0 25px 60px rgba(${h1%50}, ${h2%50}, 40, 0.45)`;
     }
 
-    // Altera cores de forma dinâmica e interativa ao subir uma imagem
-    function updateColorsFromImage() {
-        const r = Math.floor(Math.random() * 360);
-        updateInterfaceColors(r, (r + 120) % 360, `hsl(${r}, 95%, 55%)`);
+    // Extrai a cor predominante da imagem real para deixar a interface da cor exata da capa
+    function updateColorsFromImage(imgElement) {
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = 10;
+        tempCanvas.height = 10;
+        
+        // Desenha a imagem miniaturizada para obter uma média de pixels
+        tempCtx.drawImage(imgElement, 0, 0, 10, 10);
+        try {
+            const pixelData = tempCtx.getImageData(5, 5, 1, 1).data;
+            const r = pixelData[0], g = pixelData[1], b = pixelData[2];
+            
+            // Converte RGB obtido da foto para HSL
+            let rNorm = r / 255, gNorm = g / 255, bNorm = b / 255;
+            let max = Math.max(rNorm, gNorm, bNorm), min = Math.min(rNorm, gNorm, bNorm);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0; // tom de cinza
+            } else {
+                let d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case rNorm: h = (gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0); break;
+                    case gNorm: h = (bNorm - rNorm) / d + 2; break;
+                    case bNorm: h = (rNorm - gNorm) / d + 4; break;
+                }
+                h /= 6;
+            }
+            
+            const hue = Math.round(h * 360);
+            updateInterfaceColors(hue, (hue + 140) % 360, `rgb(${r},${g},${b})`);
+        } catch(e) {
+            // Fallback caso dê erro de segurança local
+            const rand = Math.floor(Math.random() * 360);
+            updateInterfaceColors(rand, (rand + 120) % 360, '#ff6b00');
+        }
     }
 
-    // Evento para trocar a capa da música atual
+    // Evento para trocar e SALVAR de verdade a capa da música atual
     coverUpload.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -520,19 +555,28 @@
         reader.onload = function(evt) {
             const base64Image = evt.target.result;
             
-            // Salvar no IndexedDB na música ativa no momento
+            // Abrindo transação de escrita para salvar permanentemente no banco IndexedDB
             const tx = db.transaction('tracks', 'readwrite');
             const store = tx.objectStore('tracks');
+            
             store.get(currentTrackId).onsuccess = (ev) => {
                 const track = ev.target.result;
                 if (track) {
-                    track.cover = base64Image;
+                    track.cover = base64Image; // Vincula a imagem à música
                     store.put(track).onsuccess = () => {
-                        // Atualizar exibição imediatamente na tela
+                        // Força a atualização imediata das cores e da tela
                         coverCanvas.style.display = 'none';
                         customCoverImg.src = base64Image;
                         customCoverImg.style.display = 'block';
-                        updateColorsFromImage();
+                        
+                        // Espera a imagem carregar no elemento para ler as cores dela
+                        customCoverImg.onload = function() {
+                            updateColorsFromImage(customCoverImg);
+                        };
+
+                        // Atualiza a memória local da playlist para não precisar recarregar
+                        const idx = playlistInMemory.findIndex(t => t.id === currentTrackId);
+                        if(idx !== -1) playlistInMemory[idx].cover = base64Image;
                     };
                 }
             };
@@ -725,7 +769,7 @@
                 name: file.name.replace(/\.[^/.]+$/, ""),
                 fileData: file, 
                 order: currentMaxOrder++,
-                cover: null
+                cover: null // Campo explicitamente instanciado
             };
             store.add(track);
         }
@@ -741,12 +785,19 @@
         audioPlayer.src = currentObjectURL;
         currentTitle.textContent = track.name;
         
-        // Renderiza a capa salva se houver, senão gera a dinâmica abstrata
+        // Verifica de forma segura se a música possui uma capa salva no IndexedDB
         if (track.cover) {
             coverCanvas.style.display = 'none';
             customCoverImg.src = track.cover;
             customCoverImg.style.display = 'block';
-            updateColorsFromImage();
+            
+            if (customCoverImg.complete) {
+                updateColorsFromImage(customCoverImg);
+            } else {
+                customCoverImg.onload = function() {
+                    updateColorsFromImage(customCoverImg);
+                };
+            }
         } else {
             generateDefaultCover(track.name);
         }
