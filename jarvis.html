@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS - Interface de Sistema</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #030811;
+            color: #00f0ff;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Efeito de linhas de scan da tela */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        /* Container Principal */
+        .jarvis-container {
+            position: relative;
+            width: 90vw;
+            height: 90vh;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Título do Sistema */
+        .system-title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            text-shadow: 0 0 8px #00f0ff;
+            animation: pulse 2s infinite alternate;
+        }
+
+        /* Reator ARC Central */
+        .arc-reactor {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 4px dashed rgba(0, 240, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+            animation: rotate Clockwise 10s linear infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .arc-reactor::before {
+            content: '';
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 2px solid #00f0ff;
+            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.5);
+            animation: rotate CounterClockwise 6s linear infinite;
+        }
+
+        .arc-core {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ffffff 20%, rgba(0, 240, 255, 0.8) 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 40px #00f0ff;
+        }
+
+        /* Painéis Laterais de Dados */
+        .panel {
+            position: absolute;
+            background: rgba(0, 20, 40, 0.4);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 15px;
+            font-size: 0.8rem;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+
+        .panel-left {
+            top: 80px;
+            left: 20px;
+            width: 250px;
+        }
+
+        .panel-right {
+            bottom: 80px;
+            right: 20px;
+            width: 250px;
+        }
+
+        .panel-bottom {
+            bottom: 20px;
+            left: 20px;
+            width: 400px;
+            height: 80px;
+            overflow: hidden;
+        }
+
+        .panel h3 {
+            border-bottom: 1px solid rgba(0, 240, 255, 0.5);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .data-line {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .value {
+            color: #fff;
+            text-shadow: 0 0 5px #00f0ff;
+        }
+
+        /* Animações */
+        @keyframes rotateClockwise {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes rotateCounterClockwise {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="jarvis-container">
+        <div class="system-title">J.A.R.V.I.S. // ONLINE</div>
+
+        <div class="panel panel-left">
+            <h3>Status do Sistema</h3>
+            <div class="data-line">CPU: <span class="value" id="cpu-val">24%</span></div>
+            <div class="data-line">NÚCLEO: <span class="value" id="core-temp">42°C</span></div>
+            <div class="data-line">MEMÓRIA: <span class="value">12.4 GB / 32 GB</span></div>
+            <div class="data-line">CONEXÃO: <span class="value" style="color: #00ff66;">SEGURA</span></div>
+        </div>
+
+        <div class="arc-reactor">
+            <div class="arc-core"></div>
+        </div>
+
+        <div class="panel panel-right">
+            <h3>Diagnóstico de Energia</h3>
+            <div class="data-line">SAÍDA: <span class="value" id="power-output">98.2%</span></div>
+            <div class="data-line">REATOR ARC: <span class="value" style="color: #00ff66;">ESTÁVEL</span></div>
+            <div class="data-line">TENSÃO: <span class="value">1.21 GW</span></div>
+        </div>
+
+        <div class="panel panel-bottom">
+            <h3>Terminal de Logs</h3>
+            <div id="log-container">
+                <div class="data-line">> Inicializando protocolos de defesa...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulação de dados mudando em tempo real (Efeito Jarvis)
+        setInterval(() => {
+            // Atualiza CPU
+            const cpu = Math.floor(Math.random() * (45 - 15) + 15);
+            document.getElementById('cpu-val').innerText = cpu + '%';
+
+            // Atualiza Temperatura
+            const temp = Math.floor(Math.random() * (48 - 38) + 38);
+            document.getElementById('core-temp').innerText = temp + '°C';
+
+            // Atualiza Energia
+            const power = (Math.random() * (99.9 - 97.5) + 97.5).toFixed(1);
+            document.getElementById('power-output').innerText = power + '%';
+        }, 1500);
+
+        // Logs aleatórios no terminal inferior
+        const logs = [
+            "> Verificando integridade da rede...",
+            "> Banco de dados sincronizado.",
+            "> Malha de energia otimizada.",
+            "> Nenhum intruso detectado.",
+            "> Varredura de perímetro concluída."
+        ];
+
+        const logContainer = document.getElementById('log-container');
+        setInterval(() => {
+            const randomLog = logs[Math.floor(Math.random() * logs.length)];
+            logContainer.innerHTML = `<div class="data-line">${randomLog}</div>`;
+        }, 4000);
+    </script>
+</body>
+</html>
