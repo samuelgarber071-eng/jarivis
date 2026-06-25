@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Clone do ChatGPT com Busca</title>
+    <title>Meu Clone do ChatGPT - Modo Wikipédia</title>
     <style>
         * {
             margin: 0;
@@ -90,12 +90,12 @@
 <body>
 
     <div class="chat-container" id="chatContainer">
-        <div class="message bot-message">Olá! Pergunte-me sobre qualquer assunto (ex: "Gato", "Brasil", "Futebol") que eu vou pesquisar para você!</div>
+        <div class="message bot-message">Olá! Eu sou sua IA conectada à Wikipédia. Pode me perguntar sobre qualquer assunto (ex: "Quem foi Albert Einstein?" ou "Como funciona a fotossíntese?").</div>
     </div>
 
     <div class="input-area">
         <div class="input-box">
-            <input type="text" id="userInput" placeholder="Digite um termo para pesquisar..." onkeypress="verificarTecla(event)">
+            <input type="text" id="userInput" placeholder="Pergunte algo para a Wikipédia..." onkeypress="verificarTecla(event)">
             <button onclick="enviarMensagem()">Enviar</button>
         </div>
     </div>
@@ -105,35 +105,42 @@
         const userInput = document.getElementById('userInput');
 
         async function enviarMensagem() {
-            const termoBusca = userInput.value.trim();
-            if (termoBusca === "") return;
+            const textoUsuario = userInput.value.trim();
+            if (textoUsuario === "") return;
 
             // 1. Mostra a mensagem do usuário
-            criarMensagem(termoBusca, 'user-message');
+            criarMensagem(textoUsuario, 'user-message');
             userInput.value = ""; 
 
-            // 2. Cria um balão de "Pensando..." para a IA
-            const IdMensagemPensando = criarMensagem("Pesquisando na base de dados...", 'bot-message');
+            // 2. Balão de "Pensando..."
+            const balaoIA = criarMensagem("Pesquisando na Wikipédia...", 'bot-message');
 
-            // 3. Faz a busca real na API da Wikipedia
             try {
-                // Monta a URL de busca da Wikipedia em português
-                const url = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(termoBusca)}`;
-                
-                const resposta = await fetch(url);
-                
-                if (!resposta.ok) {
-                    throw new Error("Não encontrado");
+                // ETAPA 1: Pesquisar termos relacionados na Wikipédia
+                const urlBusca = `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(textoUsuario)}&format=json&origin=*`;
+                const respostaBusca = await fetch(urlBusca);
+                const dadosBusca = await respostaBusca.json();
+
+                // Se não encontrar nenhum resultado na busca
+                if (!dadosBusca.query.search || dadosBusca.query.search.length === 0) {
+                    balaoIA.innerText = `Não encontrei nenhum artigo na Wikipédia sobre "${textoUsuario}". Tente usar outras palavras!`;
+                    return;
                 }
 
-                const dados = await resposta.json();
-                
-                // Atualiza o texto do balão com o resumo encontrado
-                IdMensagemPensando.innerText = dados.extract;
+                // Pega o título do primeiro artigo mais relevante encontrado
+                const tituloArtigo = dadosBusca.query.search[0].title;
+
+                // ETAPA 2: Buscar o resumo desse artigo específico
+                const urlResumo = `https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tituloArtigo)}`;
+                const respostaResumo = await fetch(urlResumo);
+                const dadosResumo = await respostaResumo.json();
+
+                // Exibe o resumo na tela
+                balaoIA.innerText = dadosResumo.extract;
 
             } catch (erro) {
-                // Se a pesquisa falhar ou não achar o termo
-                IdMensagemPensando.innerText = `Desculpe, não consegui encontrar informações sobre "${termoBusca}". Tente digitar de forma mais simples (ex: em vez de "o que é um gato", digite apenas "gato").`;
+                balaoIA.innerText = "Ops! Tive um problema de conexão ao acessar a Wikipédia. Tente novamente mais tarde.";
+                console.error(erro);
             }
         }
 
@@ -144,7 +151,7 @@
             chatContainer.appendChild(div);
             
             chatContainer.scrollTop = chatContainer.scrollHeight;
-            return div; // Retorna o elemento para podermos modificá-lo depois
+            return div;
         }
 
         function verificarTecla(event) {
