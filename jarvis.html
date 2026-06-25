@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Estilo AIMP - Com Capas e Cores Dinâmicas</title>
+    <title>Player Estilo AIMP - 100% Permanent Offline</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- Biblioteca para extrair cores da imagem -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script>
         tailwind.config = {
@@ -29,9 +28,6 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
             .scrollbar-thin {
                 scrollbar-width: thin;
                 scrollbar-color: var(--cor-accent) #121418;
@@ -47,10 +43,6 @@
                 border-radius: 3px;
                 opacity: 0.7;
             }
-            .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-                background-color: var(--cor-accent);
-                opacity: 1;
-            }
             .btn-hover {
                 transition: all 0.2s ease;
             }
@@ -58,7 +50,6 @@
                 transform: translateY(-1px);
                 filter: brightness(1.15);
             }
-            /* Variáveis dinâmicas */
             :root {
                 --cor-accent: #2E86AB;
                 --cor-accent-clara: #4298bd;
@@ -67,20 +58,16 @@
                 --cor-sombra: rgba(46, 134, 171, 0.25);
             }
             .bg-accent { background-color: var(--cor-accent); }
-            .bg-accent-escura { background-color: var(--cor-accent-escura); }
-            .bg-accent-clara { background-color: var(--cor-accent-clara); }
+            .bg-accent-alpha { background-color: rgba(var(--cor-accent-rgb, "46, 134, 171"), 0.2); }
             .text-accent { color: var(--cor-accent); }
-            .border-accent { border-color: var(--cor-accent); }
             .hover-accent:hover { color: var(--cor-accent); }
-            .bg-accent-alpha { background-color: rgba(var(--cor-accent-rgb), 0.2); }
             .transition-cores {
-                transition: background-color 0.6s ease, border-color 0.6s ease, color 0.6s ease, box-shadow 0.6s ease;
+                transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
             }
         }
     </style>
 </head>
 <body class="bg-base-dark text-base-text h-screen flex flex-col overflow-hidden transition-cores">
-    <!-- Cabeçalho -->
     <header class="bg-base-medium px-4 py-2 flex items-center justify-between border-b border-base-light transition-cores">
         <div class="flex items-center gap-2">
             <i class="fa fa-music text-accent text-xl"></i>
@@ -88,18 +75,16 @@
         </div>
         <div class="flex gap-2">
             <button id="btnBackup" class="btn-hover bg-accent px-3 py-1 rounded text-sm flex items-center gap-1 text-white">
-                <i class="fa fa-download"></i> Backup
+                <i class="fa fa-download"></i> Exportar Banco
             </button>
             <button id="btnRestore" class="btn-hover bg-green-600 px-3 py-1 rounded text-sm flex items-center gap-1 text-white">
-                <i class="fa fa-upload"></i> Restaurar
+                <i class="fa fa-upload"></i> Importar Banco
             </button>
             <input type="file" id="inputRestore" accept=".json" class="hidden">
         </div>
     </header>
 
-    <!-- Área Principal -->
     <div class="flex flex-1 overflow-hidden">
-        <!-- Barra Lateral -->
         <aside class="w-64 bg-base-medium border-r border-base-light p-3 flex flex-col gap-4 transition-cores">
             <div>
                 <h3 class="text-sm uppercase text-gray-400 mb-2 font-medium">Biblioteca</h3>
@@ -108,7 +93,7 @@
                         <i class="fa fa-list-ul"></i> Playlist
                     </li>
                     <li class="flex items-center gap-2 p-2 rounded hover:bg-base-light cursor-pointer transition-cores" data-tab="arquivos">
-                        <i class="fa fa-folder-open"></i> Arquivos
+                        <i class="fa fa-folder-open"></i> Arquivos (<span id="countArquivos">0</span>)
                     </li>
                     <li class="flex items-center gap-2 p-2 rounded hover:bg-base-light cursor-pointer transition-cores" data-tab="lixeira">
                         <i class="fa fa-trash"></i> Lixeira
@@ -116,72 +101,58 @@
                 </ul>
             </div>
 
-            <!-- Área da Capa de Álbum -->
             <div class="mt-auto flex flex-col items-center gap-3 p-3 bg-base-light rounded-lg transition-cores shadow-lg">
-                <div id="capaContainer" class="w-full aspect-square bg-base-medium rounded flex items-center justify-center overflow-hidden shadow-inner">
+                <div id="capaContainer" class="w-full aspect-square bg-base-medium rounded flex items-center justify-center overflow-hidden shadow-inner relative">
                     <img id="capaImagem" src="" alt="Capa do Álbum" class="w-full h-full object-cover hidden">
-                    <i class="fa fa-music text-5xl text-gray-500"></i>
+                    <i class="fa fa-music text-5xl text-gray-500 absolute"></i>
                 </div>
-                <p id="infoAlbum" class="text-xs text-center text-gray-400">Nenhuma música selecionada</p>
+                <p id="infoAlbum" class="text-xs text-center text-gray-400 truncate w-full">Nenhuma música selecionada</p>
             </div>
         </aside>
 
-        <!-- Conteúdo Central -->
         <main class="flex-1 flex flex-col overflow-hidden">
-            <!-- Área de Conteúdo Dinâmico -->
             <div id="conteudo" class="flex-1 p-4 overflow-y-auto scrollbar-thin">
-                <!-- Playlist -->
                 <div id="tab-playlist" class="tab-conteudo">
                     <div class="flex justify-between items-center mb-3">
                         <h2 class="text-lg font-semibold">Minha Playlist</h2>
                         <label for="arquivosMusica" class="cursor-pointer btn-hover bg-accent px-3 py-1 rounded text-sm text-white">
-                            <i class="fa fa-plus mr-1"></i> Adicionar Músicas
+                            <i class="fa fa-plus mr-1"></i> Importar para o Disco do Player
                         </label>
                         <input type="file" id="arquivosMusica" accept=".mp3,.wav,.ogg,.flac,.m4a" multiple class="hidden">
                     </div>
-                    <ul id="listaPlaylist" class="space-y-1">
-                        <li class="text-gray-400 text-center py-10">Nenhuma música adicionada ainda</li>
-                    </ul>
+                    <ul id="listaPlaylist" class="space-y-1"></ul>
                 </div>
 
-                <!-- Arquivos -->
                 <div id="tab-arquivos" class="tab-conteudo hidden">
-                    <h2 class="text-lg font-semibold mb-3">Arquivos Carregados</h2>
-                    <ul id="listaArquivos" class="space-y-1">
-                        <li class="text-gray-400 text-center py-10">Nenhum arquivo disponível</li>
-                    </ul>
+                    <h2 class="text-lg font-semibold mb-3">Gerenciador de Armazenamento Local</h2>
+                    <p class="text-xs text-gray-400 mb-4">Estas músicas estão fisicamente salvas dentro do banco de dados IndexedDB do seu navegador.</p>
+                    <ul id="listaArquivos" class="space-y-1"></ul>
                 </div>
 
-                <!-- Lixeira -->
                 <div id="tab-lixeira" class="tab-conteudo hidden">
                     <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-lg font-semibold mb-3">Lixeira</h2>
+                        <h2 class="text-lg font-semibold">Lixeira</h2>
                         <button id="esvaziarLixeira" class="btn-hover bg-red-600 px-3 py-1 rounded text-sm text-white">
                             Esvaziar Tudo
                         </button>
                     </div>
-                    <ul id="listaLixeira" class="space-y-1">
-                        <li class="text-gray-400 text-center py-10">Lixeira vazia</li>
-                    </ul>
+                    <ul id="listaLixeira" class="space-y-1"></ul>
                 </div>
             </div>
 
-            <!-- Barra de Controles do Player -->
             <footer class="bg-base-medium border-t border-base-light p-4 transition-cores">
-                <audio id="audioPlayer" preload="metadata">
+                <audio id="audioPlayer" preload="metadata"></audio>
                 
                 <div class="flex flex-col gap-3">
                     <div class="flex justify-between text-sm">
-                        <span id="tituloAtual" class="font-medium">Nenhuma música selecionada</span>
+                        <span id="tituloAtual" class="font-medium truncate max-w-md">Nenhuma música selecionada</span>
                         <span id="tempoAtual">00:00 / 00:00</span>
                     </div>
 
-                    <!-- Barra de Progresso -->
                     <div class="w-full h-2 bg-base-light rounded-full overflow-hidden cursor-pointer transition-cores" id="barraProgresso">
-                        <div id="progresso" class="h-full bg-accent rounded-full w-0 transition-all duration-150"></div>
+                        <div id="progresso" class="h-full bg-accent rounded-full w-0"></div>
                     </div>
 
-                    <!-- Controles Principais -->
                     <div class="flex items-center justify-center gap-6">
                         <button id="btnAnterior" class="text-2xl hover-accent btn-hover transition-colors">
                             <i class="fa fa-step-backward"></i>
@@ -204,7 +175,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
     <script>
-        // Variáveis Globais
         const audioPlayer = document.getElementById('audioPlayer');
         const arquivosMusica = document.getElementById('arquivosMusica');
         const listaPlaylist = document.getElementById('listaPlaylist');
@@ -224,25 +194,79 @@
         const esvaziarLixeira = document.getElementById('esvaziarLixeira');
         const capaImagem = document.getElementById('capaImagem');
         const infoAlbum = document.getElementById('infoAlbum');
+        const countArquivos = document.getElementById('countArquivos');
         const colorThief = new ColorThief();
 
-        let playlist = JSON.parse(localStorage.getItem('playlist')) || [];
-        let lixeira = JSON.parse(localStorage.getItem('lixeira')) || [];
+        let db = null;
+        let playlist = [];
+        let lixeira = [];
         let indiceAtual = 0;
+        let blobUrlAtual = null; // Guardar referência para limpar memória anterior
 
-        // Funções Auxiliares
+        // --- SISTEMA INDEXEDDB (ARMAZENAMENTO OFFLINE REAL) ---
+        const request = indexedDB.open("AimpPlayerOfflineDB", 1);
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("musicas")) {
+                db.createObjectStore("musicas", { keyPath: "id", autoIncrement: true });
+            }
+        };
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            carregarDadosDoBanco();
+        };
+
+        function carregarDadosDoBanco() {
+            const transaction = db.transaction(["musicas"], "readonly");
+            const store = transaction.objectStore("musicas");
+            const requestAll = store.getAll();
+
+            requestAll.onsuccess = () => {
+                const todas = requestAll.result;
+                playlist = todas.filter(m => !m.naoLixeira);
+                lixeira = todas.filter(m => m.naoLixeira);
+                renderizarPlaylist();
+                renderizarLixeira();
+            };
+        }
+
+        function salvarMusicaNoBanco(objetoMusica, callback) {
+            const transaction = db.transaction(["musicas"], "readwrite");
+            const store = transaction.objectStore("musicas");
+            const req = store.add(objetoMusica);
+            req.onsuccess = (e) => {
+                objetoMusica.id = e.target.result;
+                callback(objetoMusica);
+            };
+        }
+
+        function atualizarStatusLixeiraNoBanco(id, estaNaLixeira) {
+            const transaction = db.transaction(["musicas"], "readwrite");
+            const store = transaction.objectStore("musicas");
+            const req = store.get(id);
+            req.onsuccess = () => {
+                const data = req.result;
+                if(data) {
+                    data.naoLixeira = estaNaLixeira;
+                    store.put(data);
+                }
+            };
+        }
+
+        function deletarDefinitivoNoBanco(id) {
+            const transaction = db.transaction(["musicas"], "readwrite");
+            const store = transaction.objectStore("musicas");
+            store.delete(id);
+        }
+
+        // --- ENFIM REGRAS DO PLAYER ---
         function formatarTempo(segundos) {
+            if(isNaN(segundos)) return "00:00";
             const min = Math.floor(segundos / 60);
             const seg = Math.floor(segundos % 60);
             return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
         }
 
-        function salvarDados() {
-            localStorage.setItem('playlist', JSON.stringify(playlist));
-            localStorage.setItem('lixeira', JSON.stringify(lixeira));
-        }
-
-        // Extrair metadados e capa do arquivo
         function lerMetadados(arquivo, callback) {
             jsmediatags.read(arquivo, {
                 onSuccess: function(tag) {
@@ -272,22 +296,19 @@
             });
         }
 
-        // Extrair cor predominante da capa e aplicar no tema
         function aplicarCoresDaCapa(urlImagem) {
             if (!urlImagem) {
                 resetarCores();
                 return;
             }
             const img = new Image();
-            img.crossOrigin = "Anonymous";
             img.onload = () => {
                 try {
                     const cor = colorThief.getColor(img);
                     const [r, g, b] = cor;
                     const brilho = (r * 299 + g * 587 + b * 114) / 1000;
                     
-                    // Ajusta cor para ficar visível no fundo escuro
-                    const fator = brilho < 120 ? 1.5 : 0.8;
+                    const fator = brilho < 120 ? 1.4 : 0.9;
                     const nr = Math.min(255, Math.round(r * fator));
                     const ng = Math.min(255, Math.round(g * fator));
                     const nb = Math.min(255, Math.round(b * fator));
@@ -296,9 +317,7 @@
                     document.documentElement.style.setProperty('--cor-accent-rgb', `${nr}, ${ng}, ${nb}`);
                     document.documentElement.style.setProperty('--cor-accent-escura', `rgb(${Math.max(0, nr-40)}, ${Math.max(0, ng-40)}, ${Math.max(0, nb-40)})`);
                     document.documentElement.style.setProperty('--cor-accent-clara', `rgb(${Math.min(255, nr+30)}, ${Math.min(255, ng+30)}, ${Math.min(255, nb+30)})`);
-                } catch (e) {
-                    resetarCores();
-                }
+                } catch (e) { resetarCores(); }
             };
             img.onerror = resetarCores;
             img.src = urlImagem;
@@ -313,26 +332,33 @@
 
         function renderizarPlaylist() {
             listaPlaylist.innerHTML = playlist.length ? '' : '<li class="text-gray-400 text-center py-10">Nenhuma música adicionada ainda</li>';
+            listaArquivos.innerHTML = playlist.length ? '' : '<li class="text-gray-400 text-center py-10">Nenhum bloco detectado</li>';
+            countArquivos.textContent = playlist.length;
+
             playlist.forEach((musica, i) => {
                 const li = document.createElement('li');
-                li.className = `p-3 rounded flex justify-between items-center cursor-pointer hover:bg-base-light transition-cores ${i === indiceAtual ? 'bg-accent-alpha' : ''}`;
+                li.className = `p-3 rounded flex justify-between items-center cursor-pointer hover:bg-base-light transition-cores ${i === indiceAtual ? 'bg-accent-alpha border-l-4 border-accent' : ''}`;
                 li.innerHTML = `
-                    <div class="flex items-center gap-3 flex-1" onclick="tocarMusica(${i})">
-                        <div class="w-10 h-10 rounded bg-base-medium flex items-center justify-center overflow-hidden">
+                    <div class="flex items-center gap-3 flex-1 overflow-hidden" onclick="tocarMusica(${i})">
+                        <div class="w-10 h-10 rounded bg-base-medium flex items-center justify-center overflow-hidden flex-shrink-0">
                             ${musica.capa ? `<img src="${musica.capa}" class="w-full h-full object-cover">` : `<i class="fa fa-music text-gray-500"></i>`}
                         </div>
                         <div class="overflow-hidden">
-                            <p class="font-medium truncate">${musica.titulo}</p>
+                            <p class="font-medium truncate text-sm">${musica.titulo}</p>
                             <p class="text-xs text-gray-400 truncate">${musica.artista} • ${musica.album}</p>
                         </div>
                     </div>
-                    <button onclick="moverParaLixeira(${i})" class="text-red-500 hover:text-red-400 text-lg">
+                    <button onclick="moverParaLixeira(${i})" class="text-red-500 hover:text-red-400 text-lg p-2 flex-shrink-0">
                         <i class="fa fa-trash-o"></i>
                     </button>
                 `;
                 listaPlaylist.appendChild(li);
+
+                const liArq = document.createElement('li');
+                liArq.className = 'p-2 rounded bg-base-light text-xs text-gray-400 flex justify-between items-center';
+                liArq.innerHTML = `<span>ID #${musica.id || 'N/A'}: ${musica.titulo} (${(musica.arquivoBlob.size/1024/1024).toFixed(2)} MB)</span> <span class="text-green-500">OK (Salvo no Banco)</span>`;
+                listaArquivos.appendChild(liArq);
             });
-            salvarDados();
         }
 
         function renderizarLixeira() {
@@ -341,27 +367,26 @@
                 const li = document.createElement('li');
                 li.className = 'p-3 rounded flex justify-between items-center hover:bg-base-light transition-cores';
                 li.innerHTML = `
-                    <div class="flex items-center gap-3 flex-1">
-                        <div class="w-9 h-9 rounded bg-base-medium flex items-center justify-center overflow-hidden">
+                    <div class="flex items-center gap-3 flex-1 overflow-hidden">
+                        <div class="w-9 h-9 rounded bg-base-medium flex items-center justify-center overflow-hidden flex-shrink-0">
                             ${musica.capa ? `<img src="${musica.capa}" class="w-full h-full object-cover">` : `<i class="fa fa-music text-gray-500"></i>`}
                         </div>
-                        <div>
-                            <p class="font-medium">${musica.titulo}</p>
-                            <p class="text-xs text-gray-400">${musica.artista}</p>
+                        <div class="overflow-hidden">
+                            <p class="font-medium truncate text-sm">${musica.titulo}</p>
+                            <p class="text-xs text-gray-400 truncate">${musica.artista}</p>
                         </div>
                     </div>
-                    <div class="flex gap-3">
-                        <button onclick="restaurarDaLixeira(${i})" class="text-green-500 hover:text-green-400 text-lg">
+                    <div class="flex gap-3 flex-shrink-0">
+                        <button onclick="restaurarDaLixeira(${i})" class="text-green-500 hover:text-green-400 text-lg p-1">
                             <i class="fa fa-undo"></i>
                         </button>
-                        <button onclick="excluirDefinitivamente(${i})" class="text-red-500 hover:text-red-400 text-lg">
+                        <button onclick="excluirDefinitivamente(${i})" class="text-red-500 hover:text-red-400 text-lg p-1">
                             <i class="fa fa-times"></i>
                         </button>
                     </div>
                 `;
                 listaLixeira.appendChild(li);
             });
-            salvarDados();
         }
 
         function tocarMusica(indice) {
@@ -369,11 +394,15 @@
             indiceAtual = indice;
             const musica = playlist[indice];
             
-            audioPlayer.src = musica.url;
+            // Limpa a URL temporária anterior da memória RAM para evitar vazamento
+            if (blobUrlAtual) URL.revokeObjectURL(blobUrlAtual);
+
+            // Transforma o arquivo binário armazenado do IndexedDB em URL de reprodução instantânea
+            blobUrlAtual = URL.createObjectURL(musica.arquivoBlob);
+            audioPlayer.src = blobUrlAtual;
             tituloAtual.textContent = `${musica.titulo} - ${musica.artista}`;
             infoAlbum.textContent = `${musica.artista} • ${musica.album}`;
             
-            // Atualizar capa
             if (musica.capa) {
                 capaImagem.src = musica.capa;
                 capaImagem.classList.remove('hidden');
@@ -392,11 +421,14 @@
 
         function moverParaLixeira(indice) {
             const removida = playlist.splice(indice, 1)[0];
+            removida.naoLixeira = true;
             lixeira.push(removida);
+            atualizarStatusLixeiraNoBanco(removida.id, true);
+
             if (indice === indiceAtual) {
                 audioPlayer.pause();
                 tituloAtual.textContent = 'Nenhuma música selecionada';
-                infoAlbum.textContent = '';
+                infoAlbum.textContent = 'Nenhuma música selecionada';
                 capaImagem.classList.add('hidden');
                 document.querySelector('#capaContainer > i').classList.remove('hidden');
                 btnPlay.innerHTML = '<i class="fa fa-play-circle"></i>';
@@ -408,30 +440,35 @@
 
         function restaurarDaLixeira(indice) {
             const restaurada = lixeira.splice(indice, 1)[0];
+            restaurada.naoLixeira = false;
             playlist.push(restaurada);
+            atualizarStatusLixeiraNoBanco(restaurada.id, false);
             renderizarPlaylist();
             renderizarLixeira();
         }
 
         function excluirDefinitivamente(indice) {
-            lixeira.splice(indice, 1);
+            const removida = lixeira.splice(indice, 1)[0];
+            deletarDefinitivoNoBanco(removida.id);
             renderizarLixeira();
         }
 
-        // Eventos
         arquivosMusica.addEventListener('change', (e) => {
             const arquivos = e.target.files;
             Array.from(arquivos).forEach(arquivo => {
-                const url = URL.createObjectURL(arquivo);
                 lerMetadados(arquivo, dados => {
-                    playlist.push({
-                        url: url,
+                    const novaMusica = {
+                        arquivoBlob: arquivo, // Guarda o arquivo binário real inteiro aqui dentro!
                         titulo: dados.titulo,
                         artista: dados.artista,
                         album: dados.album,
-                        capa: dados.capa
+                        capa: dados.capa,
+                        naoLixeira: false
+                    };
+                    salvarMusicaNoBanco(novaMusica, (itemSalvo) => {
+                        playlist.push(itemSalvo);
+                        renderizarPlaylist();
                     });
-                    renderizarPlaylist();
                 });
             });
         });
@@ -476,7 +513,6 @@
 
         volume.addEventListener('input', () => audioPlayer.volume = volume.value);
 
-        // Navegação entre abas
         document.querySelectorAll('[data-tab]').forEach(aba => {
             aba.addEventListener('click', () => {
                 document.querySelectorAll('.tab-conteudo').forEach(t => t.classList.add('hidden'));
@@ -486,16 +522,37 @@
             });
         });
 
-        // Sistema de Backup
+        // Backup do Banco em Texto Base64
         btnBackup.addEventListener('click', () => {
-            const dados = { playlist, lixeira };
-            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `backup-player-${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            const transaction = db.transaction(["musicas"], "readonly");
+            const store = transaction.objectStore("musicas");
+            store.getAll().onsuccess = (e) => {
+                const todas = e.target.result;
+                const promessas = todas.map(m => {
+                    return new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            resolve({
+                                titulo: m.titulo,
+                                artista: m.artista,
+                                album: m.album,
+                                capa: m.capa,
+                                naoLixeira: m.naoLixeira,
+                                arquivoBase64: reader.result
+                            });
+                        };
+                        reader.readAsDataURL(m.arquivoBlob);
+                    });
+                });
+                Promise.all(promessas).then(dadosExportados => {
+                    const blob = new Blob([JSON.stringify(dadosExportados)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `aimp-database-full.json`;
+                    a.click();
+                });
+            };
         });
 
         btnRestore.addEventListener('click', () => inputRestore.click());
@@ -505,29 +562,45 @@
             const leitor = new FileReader();
             leitor.onload = (evt) => {
                 try {
-                    const dados = JSON.parse(evt.target.result);
-                    playlist = dados.playlist || [];
-                    lixeira = dados.lixeira || [];
-                    renderizarPlaylist();
-                    renderizarLixeira();
-                    alert('Backup restaurado com sucesso!');
-                } catch {
-                    alert('Arquivo de backup inválido!');
-                }
+                    const lista = JSON.parse(evt.target.result);
+                    const tx = db.transaction(["musicas"], "readwrite");
+                    const store = tx.objectStore("musicas");
+                    
+                    lista.forEach(item => {
+                        // Converter Base64 de volta para Blob físico
+                        const partes = item.arquivoBase64.split(',');
+                        const byteString = atob(partes[1]);
+                        const mimeString = partes[0].split(':')[1].split(';')[0];
+                        const ab = new ArrayBuffer(byteString.length);
+                        const ia = new Uint8Array(ab);
+                        for (let i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); }
+                        const blob = new Blob([ab], { type: mimeString });
+
+                        store.add({
+                            arquivoBlob: blob,
+                            titulo: item.titulo,
+                            artista: item.artista,
+                            album: item.album,
+                            capa: item.capa,
+                            naoLixeira: item.naoLixeira
+                        });
+                    });
+                    tx.oncomplete = () => {
+                        alert('Banco de dados importado e restaurado!');
+                        carregarDadosDoBanco();
+                    };
+                } catch { alert('Arquivo inválido!'); }
             };
             leitor.readAsText(arquivo);
         });
 
         esvaziarLixeira.addEventListener('click', () => {
             if (confirm('Deseja esvaziar a lixeira definitivamente?')) {
+                lixeira.forEach(m => deletarDefinitivoNoBanco(m.id));
                 lixeira = [];
                 renderizarLixeira();
             }
         });
-
-        // Inicialização
-        renderizarPlaylist();
-        renderizarLixeira();
     </script>
 </body>
 </html>
