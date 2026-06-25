@@ -3,640 +3,531 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitePlayer Ultra Pro v4</title>
-    <style>
-        :root {
-            --bg-main: #0a0a0f;
-            --bg-card: #12121a;
-            --bg-list: #181824;
-            --accent: #ff6b00; 
-            --accent-hover: #e05e00;
-            --text: #f1f1f6;
-            --text-muted: #9ca3af;
-            --border: #262636;
-            --success: #10b981;
-            --error: #ef4444;
+    <title>Player Estilo AIMP - Com Capas e Cores Dinâmicas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Biblioteca para extrair cores da imagem -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: {
+                            dark: '#121418',
+                            medium: '#1E2127',
+                            light: '#2A2F38',
+                            text: '#E8EDF2'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
         }
-
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-        }
-
-        body { 
-            background-color: var(--bg-main); 
-            color: var(--text); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            padding: 20px; 
-        }
-
-        .player-container {
-            width: 100%;
-            max-width: 450px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            max-height: 95vh;
-        }
-
-        .player-header {
-            padding: 20px;
-            background: linear-gradient(to bottom, #1e1e2f, var(--bg-card));
-            border-bottom: 1px solid var(--border);
-        }
-
-        /* Zona do Conversor YouTube Integrado */
-        .youtube-zone {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border);
-            text-align: center;
-        }
-        .youtube-zone h4 {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-        .converter-frame {
-            width: 100%;
-            height: 60px;
-            border: none;
-            border-radius: 8px;
-            background: #09090d;
-        }
-
-        .track-title {
-            font-size: 16px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 16px;
-            color: #fff;
-            text-align: center;
-        }
-
-        audio { 
-            width: 100%; 
-            margin-bottom: 16px; 
-            height: 40px; 
-            border-radius: 8px;
-        }
-
-        .volume-zone {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #09090d;
-            padding: 10px 14px;
-            border-radius: 10px;
-            margin-bottom: 16px;
-            font-size: 13px;
-            border: 1px solid rgba(255,255,255,0.02);
-        }
-        .volume-slider {
-            flex-grow: 1;
-            accent-color: var(--accent);
-            cursor: pointer;
-            height: 6px;
-        }
-
-        .playlist-selector-zone {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        select { 
-            background: #181824; 
-            color: var(--text); 
-            border: 1px solid var(--border); 
-            padding: 10px; 
-            font-size: 13px; 
-            flex-grow: 1; 
-            border-radius: 8px;
-            outline: none;
-        }
-        
-        .file-controls { display: flex; gap: 8px; margin-bottom: 4px; }
-        
-        .btn {
-            background: #1c1c28;
-            color: var(--text);
-            border: 1px solid var(--border);
-            padding: 10px 16px;
-            font-size: 13px;
-            cursor: pointer;
-            border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        .btn:hover { background: #252538; border-color: var(--accent); }
-        .btn-accent { background: var(--accent); color: #000; font-weight: bold; border: none; flex-grow: 1; }
-        .btn-accent:hover { background: var(--accent-hover); }
-        .btn-sm { padding: 8px 12px; font-size: 12px; }
-
-        input[type="file"] { display: none; }
-
-        .playlist-actions {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: #09090d;
-            font-size: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-        .action-link { color: var(--text-muted); cursor: pointer; user-select: none; transition: color 0.2s; }
-        .action-link:hover { color: var(--accent); }
-
-        .playlist { 
-            list-style: none; 
-            overflow-y: auto; 
-            flex-grow: 1; 
-            background: var(--bg-list);
-            min-height: 180px;
-        }
-
-        .playlist-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.01);
-            font-size: 13.5px;
-            user-select: none;
-            transition: background 0.2s;
-        }
-        .playlist-item:hover { background: rgba(255,255,255,0.02); }
-        .playlist-item.active { background: rgba(255, 107, 0, 0.08); border-left: 4px solid var(--accent); }
-
-        .item-info { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding-right: 12px; }
-        .item-controls { display: flex; gap: 6px; opacity: 0.1; transition: opacity 0.2s; }
-        .playlist-item:hover .item-controls { opacity: 1; }
-        
-        .icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; padding: 4px; border-radius: 4px; }
-        .icon-btn:hover { color: var(--accent); background: rgba(255,255,255,0.04); }
-        
-        #import-status { 
-            font-size: 12px; 
-            color: #fff; 
-            text-align: center; 
-            padding: 10px; 
-            display: none; 
-            background: var(--accent);
-            font-weight: 600;
-        }
-        .info-box {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            line-height: 1.4;
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .scrollbar-thin {
+                scrollbar-width: thin;
+                scrollbar-color: var(--cor-accent) #121418;
+            }
+            .scrollbar-thin::-webkit-scrollbar {
+                width: 6px;
+            }
+            .scrollbar-thin::-webkit-scrollbar-track {
+                background: #121418;
+            }
+            .scrollbar-thin::-webkit-scrollbar-thumb {
+                background-color: var(--cor-accent);
+                border-radius: 3px;
+                opacity: 0.7;
+            }
+            .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+                background-color: var(--cor-accent);
+                opacity: 1;
+            }
+            .btn-hover {
+                transition: all 0.2s ease;
+            }
+            .btn-hover:hover {
+                transform: translateY(-1px);
+                filter: brightness(1.15);
+            }
+            /* Variáveis dinâmicas */
+            :root {
+                --cor-accent: #2E86AB;
+                --cor-accent-clara: #4298bd;
+                --cor-accent-escura: #1f6885;
+                --cor-texto: #E8EDF2;
+                --cor-sombra: rgba(46, 134, 171, 0.25);
+            }
+            .bg-accent { background-color: var(--cor-accent); }
+            .bg-accent-escura { background-color: var(--cor-accent-escura); }
+            .bg-accent-clara { background-color: var(--cor-accent-clara); }
+            .text-accent { color: var(--cor-accent); }
+            .border-accent { border-color: var(--cor-accent); }
+            .hover-accent:hover { color: var(--cor-accent); }
+            .bg-accent-alpha { background-color: rgba(var(--cor-accent-rgb), 0.2); }
+            .transition-cores {
+                transition: background-color 0.6s ease, border-color 0.6s ease, color 0.6s ease, box-shadow 0.6s ease;
+            }
         }
     </style>
 </head>
-<body>
-
-<div class="player-container">
-    <div class="player-header">
-        <div class="youtube-zone">
-            <h4>Converter Vídeo do YouTube</h4>
-            <iframe class="converter-frame" src="https://convert2mp3s.com/api/widget/mp3" allowtransparency="true" scrolling="no"></iframe>
-            <div class="info-box">Coloque o link dentro do campo acima, clique em converter e baixe o arquivo. Depois use o botão <strong>"Adicionar Músicas"</strong> abaixo para o salvar permanentemente aqui.</div>
+<body class="bg-base-dark text-base-text h-screen flex flex-col overflow-hidden transition-cores">
+    <!-- Cabeçalho -->
+    <header class="bg-base-medium px-4 py-2 flex items-center justify-between border-b border-base-light transition-cores">
+        <div class="flex items-center gap-2">
+            <i class="fa fa-music text-accent text-xl"></i>
+            <h1 class="text-lg font-semibold">Player AIMP Style</h1>
         </div>
-
-        <div class="track-title" id="current-title">Nenhuma música tocando</div>
-        <audio id="audio-player" controls></audio>
-        
-        <div class="volume-zone">
-            <span id="volume-icon">🔊</span>
-            <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.8">
-            <span id="volume-label" style="width: 35px; text-align: right;">80%</span>
+        <div class="flex gap-2">
+            <button id="btnBackup" class="btn-hover bg-accent px-3 py-1 rounded text-sm flex items-center gap-1 text-white">
+                <i class="fa fa-download"></i> Backup
+            </button>
+            <button id="btnRestore" class="btn-hover bg-green-600 px-3 py-1 rounded text-sm flex items-center gap-1 text-white">
+                <i class="fa fa-upload"></i> Restaurar
+            </button>
+            <input type="file" id="inputRestore" accept=".json" class="hidden">
         </div>
+    </header>
 
-        <div class="playlist-selector-zone">
-            <select id="select-playlist"></select>
-            <button class="btn btn-sm" id="btn-add-playlist">＋ Nova</button>
-            <button class="btn btn-sm" id="btn-ren-playlist">✏️</button>
-            <button class="btn btn-sm" id="btn-del-playlist" style="color:var(--error);">🗑️</button>
-        </div>
+    <!-- Área Principal -->
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Barra Lateral -->
+        <aside class="w-64 bg-base-medium border-r border-base-light p-3 flex flex-col gap-4 transition-cores">
+            <div>
+                <h3 class="text-sm uppercase text-gray-400 mb-2 font-medium">Biblioteca</h3>
+                <ul class="space-y-1">
+                    <li class="flex items-center gap-2 p-2 rounded bg-accent-alpha cursor-pointer transition-cores" data-tab="playlist">
+                        <i class="fa fa-list-ul"></i> Playlist
+                    </li>
+                    <li class="flex items-center gap-2 p-2 rounded hover:bg-base-light cursor-pointer transition-cores" data-tab="arquivos">
+                        <i class="fa fa-folder-open"></i> Arquivos
+                    </li>
+                    <li class="flex items-center gap-2 p-2 rounded hover:bg-base-light cursor-pointer transition-cores" data-tab="lixeira">
+                        <i class="fa fa-trash"></i> Lixeira
+                    </li>
+                </ul>
+            </div>
 
-        <div class="file-controls">
-            <label class="btn btn-accent" for="file-upload">＋ Adicionar Músicas</label>
-            <input type="file" id="file-upload" accept="audio/*" multiple>
-            <button class="btn" id="btn-clear-all">Limpar Tudo</button>
-        </div>
-    </div>
-
-    <div id="import-status">Processando... Por favor aguarde.</div>
-
-    <div class="playlist-actions">
-        <span class="action-link" id="sort-az">🔤 Organizar A-Z</span>
-        <span class="action-link" id="btn-export">📤 Exportar Backup</span>
-        <label class="action-link" for="input-import">📥 Importar Backup</label>
-        <input type="file" id="input-import" accept=".json" style="display:none;">
-    </div>
-
-    <ul class="playlist" id="playlist-container"></ul>
-</div>
-
-<script>
-    const DB_NAME = 'LitePlayerProDB';
-    const DB_VERSION = 2; 
-    let db;
-
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = (e) => {
-        db = e.target.result;
-        if (!db.objectStoreNames.contains('playlists')) {
-            db.createObjectStore('playlists', { keyPath: 'id', autoIncrement: true });
-        }
-        if (!db.objectStoreNames.contains('tracks')) {
-            db.createObjectStore('tracks', { keyPath: 'id', autoIncrement: true });
-        }
-    };
-    request.onsuccess = (e) => { db = e.target.result; checkAndLoadPlaylists(); initVolume(); };
-
-    const audioPlayer = document.getElementById('audio-player');
-    const currentTitle = document.getElementById('current-title');
-    const fileUpload = document.getElementById('file-upload');
-    const playlistContainer = document.getElementById('playlist-container');
-    const selectPlaylist = document.getElementById('select-playlist');
-    const inputImport = document.getElementById('input-import');
-    const importStatus = document.getElementById('import-status');
-    const volumeSlider = document.getElementById('volume-slider');
-    const volumeLabel = document.getElementById('volume-label');
-    const volumeIcon = document.getElementById('volume-icon');
-    
-    let activePlaylistId = null;
-    let playlistInMemory = [];
-    let currentTrackId = null;
-    let currentObjectURL = null;
-
-    function initVolume() {
-        const savedVolume = localStorage.getItem('player-volume');
-        if (savedVolume !== null) {
-            audioPlayer.volume = parseFloat(savedVolume);
-            volumeSlider.value = savedVolume;
-            updateVolumeUI(parseFloat(savedVolume));
-        }
-
-        volumeSlider.addEventListener('input', (e) => {
-            const vol = parseFloat(e.target.value);
-            audioPlayer.volume = vol;
-            localStorage.setItem('player-volume', vol);
-            updateVolumeUI(vol);
-        });
-    }
-
-    function updateVolumeUI(vol) {
-        volumeLabel.textContent = `${Math.round(vol * 100)}%`;
-        if (vol === 0) volumeIcon.textContent = '🔇';
-        else if (vol < 0.4) volumeIcon.textContent = '🔈';
-        else if (vol < 0.7) volumeIcon.textContent = '🔉';
-        else volumeIcon.textContent = '🔊';
-    }
-
-    function checkAndLoadPlaylists() {
-        const tx = db.transaction('playlists', 'readonly');
-        tx.objectStore('playlists').getAll().onsuccess = (e) => {
-            const lists = e.target.result;
-            if (lists.length === 0) {
-                const txW = db.transaction('playlists', 'readwrite');
-                txW.objectStore('playlists').add({ name: "Minha Playlist Padrão" }).onsuccess = (ev) => {
-                    activePlaylistId = ev.target.result;
-                    renderPlaylistSelect();
-                };
-            } else {
-                activePlaylistId = lists[0].id;
-                renderPlaylistSelect();
-            }
-        };
-    }
-
-    function renderPlaylistSelect() {
-        const tx = db.transaction('playlists', 'readonly');
-        tx.objectStore('playlists').getAll().onsuccess = (e) => {
-            selectPlaylist.innerHTML = '';
-            e.target.result.forEach(list => {
-                const opt = document.createElement('option');
-                opt.value = list.id;
-                opt.textContent = list.name;
-                if (list.id === activePlaylistId) opt.selected = true;
-                selectPlaylist.appendChild(opt);
-            });
-            loadTracks();
-        };
-    }
-
-    selectPlaylist.addEventListener('change', (e) => {
-        activePlaylistId = parseInt(e.target.value);
-        loadTracks();
-    });
-
-    document.getElementById('btn-add-playlist').addEventListener('click', () => {
-        const name = prompt("Nome da nova playlist:");
-        if (name && name.trim() !== "") {
-            const tx = db.transaction('playlists', 'readwrite');
-            tx.objectStore('playlists').add({ name: name.trim() }).onsuccess = (e) => {
-                activePlaylistId = e.target.result;
-                renderPlaylistSelect();
-            };
-        }
-    });
-
-    document.getElementById('btn-ren-playlist').addEventListener('click', () => {
-        const tx = db.transaction('playlists', 'readwrite');
-        const store = tx.objectStore('playlists');
-        store.get(activePlaylistId).onsuccess = (e) => {
-            const list = e.target.result;
-            const newName = prompt("Renomear playlist para:", list.name);
-            if (newName && newName.trim() !== "") {
-                list.name = newName.trim();
-                store.put(list).onsuccess = () => renderPlaylistSelect();
-            }
-        };
-    });
-
-    document.getElementById('btn-del-playlist').addEventListener('click', () => {
-        if (confirm("Excluir esta playlist e todas as músicas dentro dela?")) {
-            const txP = db.transaction('playlists', 'readwrite');
-            txP.objectStore('playlists').delete(activePlaylistId);
-            
-            const txT = db.transaction('tracks', 'readwrite');
-            const storeT = txT.objectStore('tracks');
-            playlistInMemory.forEach(track => storeT.delete(track.id));
-            
-            txP.oncomplete = () => { checkAndLoadPlaylists(); };
-        }
-    });
-
-    function loadTracks() {
-        const tx = db.transaction('tracks', 'readonly');
-        tx.objectStore('tracks').getAll().onsuccess = (e) => {
-            playlistInMemory = e.target.result
-                .filter(track => track.playlistId === activePlaylistId)
-                .sort((a, b) => a.order - b.order);
-            renderTracksDOM();
-        };
-    }
-
-    function renderTracksDOM() {
-        playlistContainer.innerHTML = '';
-        playlistInMemory.forEach((track, index) => {
-            const li = document.createElement('li');
-            li.className = `playlist-item ${track.id === currentTrackId ? 'active' : ''}`;
-            li.innerHTML = `
-                <div class="item-info" onclick="playTrack(${track.id})">
-                    ${index + 1}. <span>${track.name}</span>
+            <!-- Área da Capa de Álbum -->
+            <div class="mt-auto flex flex-col items-center gap-3 p-3 bg-base-light rounded-lg transition-cores shadow-lg">
+                <div id="capaContainer" class="w-full aspect-square bg-base-medium rounded flex items-center justify-center overflow-hidden shadow-inner">
+                    <img id="capaImagem" src="" alt="Capa do Álbum" class="w-full h-full object-cover hidden">
+                    <i class="fa fa-music text-5xl text-gray-500"></i>
                 </div>
-                <div class="item-controls">
-                    <button class="icon-btn" onclick="moveTrack(${track.id}, -1)">▲</button>
-                    <button class="icon-btn" onclick="moveTrack(${track.id}, 1)">▼</button>
-                    <button class="icon-btn" onclick="renameTrack(${track.id})">✏️</button>
-                    <button class="icon-btn" onclick="deleteTrack(${track.id})">🗑️</button>
+                <p id="infoAlbum" class="text-xs text-center text-gray-400">Nenhuma música selecionada</p>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Central -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Área de Conteúdo Dinâmico -->
+            <div id="conteudo" class="flex-1 p-4 overflow-y-auto scrollbar-thin">
+                <!-- Playlist -->
+                <div id="tab-playlist" class="tab-conteudo">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold">Minha Playlist</h2>
+                        <label for="arquivosMusica" class="cursor-pointer btn-hover bg-accent px-3 py-1 rounded text-sm text-white">
+                            <i class="fa fa-plus mr-1"></i> Adicionar Músicas
+                        </label>
+                        <input type="file" id="arquivosMusica" accept=".mp3,.wav,.ogg,.flac,.m4a" multiple class="hidden">
+                    </div>
+                    <ul id="listaPlaylist" class="space-y-1">
+                        <li class="text-gray-400 text-center py-10">Nenhuma música adicionada ainda</li>
+                    </ul>
                 </div>
-            `;
-            playlistContainer.appendChild(li);
-        });
-    }
 
-    fileUpload.addEventListener('change', (e) => {
-        const files = e.target.files;
-        const tx = db.transaction('tracks', 'readwrite');
-        const store = tx.objectStore('tracks');
-        let currentMaxOrder = playlistInMemory.length;
+                <!-- Arquivos -->
+                <div id="tab-arquivos" class="tab-conteudo hidden">
+                    <h2 class="text-lg font-semibold mb-3">Arquivos Carregados</h2>
+                    <ul id="listaArquivos" class="space-y-1">
+                        <li class="text-gray-400 text-center py-10">Nenhum arquivo disponível</li>
+                    </ul>
+                </div>
 
-        for (let file of files) {
-            const track = {
-                playlistId: activePlaylistId,
-                name: file.name.replace(/\.[^/.]+$/, ""),
-                fileData: file, 
-                order: currentMaxOrder++
-            };
-            store.add(track);
-        }
-        tx.oncomplete = () => { loadTracks(); };
-    });
+                <!-- Lixeira -->
+                <div id="tab-lixeira" class="tab-conteudo hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold mb-3">Lixeira</h2>
+                        <button id="esvaziarLixeira" class="btn-hover bg-red-600 px-3 py-1 rounded text-sm text-white">
+                            Esvaziar Tudo
+                        </button>
+                    </div>
+                    <ul id="listaLixeira" class="space-y-1">
+                        <li class="text-gray-400 text-center py-10">Lixeira vazia</li>
+                    </ul>
+                </div>
+            </div>
 
-    function playTrack(id) {
-        const track = playlistInMemory.find(t => t.id === id);
-        if (!track) return;
-        if (currentObjectURL) { URL.revokeObjectURL(currentObjectURL); }
-        currentTrackId = id;
-        currentObjectURL = URL.createObjectURL(track.fileData);
-        audioPlayer.src = currentObjectURL;
-        currentTitle.textContent = track.name;
-        audioPlayer.play();
-        renderTracksDOM();
-    }
-
-    audioPlayer.addEventListener('ended', () => {
-        const currentIndex = playlistInMemory.findIndex(t => t.id === currentTrackId);
-        if (currentIndex !== -1 && currentIndex + 1 < playlistInMemory.length) {
-            playTrack(playlistInMemory[currentIndex + 1].id);
-        }
-    });
-
-    document.getElementById('sort-az').addEventListener('click', () => {
-        if (playlistInMemory.length === 0) return;
-        playlistInMemory.sort((a, b) => a.name.localeCompare(b.name, 'pt', { sensitivity: 'base' }));
-        const tx = db.transaction('tracks', 'readwrite');
-        const store = tx.objectStore('tracks');
-        playlistInMemory.forEach((track, index) => {
-            track.order = index;
-            store.put(track); 
-        });
-        tx.oncomplete = () => { loadTracks(); };
-    });
-
-    window.moveTrack = function(id, direction) {
-        const index = playlistInMemory.findIndex(t => t.id === id);
-        const targetIndex = index + direction;
-        if (targetIndex >= 0 && targetIndex < playlistInMemory.length) {
-            const tx = db.transaction('tracks', 'readwrite');
-            const store = tx.objectStore('tracks');
-            const tempOrder = playlistInMemory[index].order;
-            playlistInMemory[index].order = playlistInMemory[targetIndex].order;
-            playlistInMemory[targetIndex].order = tempOrder;
-            store.put(playlistInMemory[index]);
-            store.put(playlistInMemory[targetIndex]);
-            tx.oncomplete = () => loadTracks();
-        }
-    };
-
-    window.renameTrack = function(id) {
-        const track = playlistInMemory.find(t => t.id === id);
-        const newName = prompt("Renomear faixa para:", track.name);
-        if (newName && newName.trim() !== "") {
-            const tx = db.transaction('tracks', 'readwrite');
-            track.name = newName.trim();
-            tx.objectStore('tracks').put(track);
-            tx.oncomplete = () => renderTracksDOM();
-        }
-    };
-
-    window.deleteTrack = function(id) {
-        if(confirm("Excluir esta música?")) {
-            const tx = db.transaction('tracks', 'readwrite');
-            tx.objectStore('tracks').delete(id);
-            tx.oncomplete = () => {
-                if (currentTrackId === id) {
-                    audioPlayer.src = '';
-                    currentTitle.textContent = "Nenhuma música tocando";
-                }
-                loadTracks();
-            };
-        }
-    };
-
-    document.getElementById('btn-clear-all').addEventListener('click', () => {
-        if(confirm("Apagar completamente TODOS os dados do aplicativo?")) {
-            indexedDB.deleteDatabase(DB_NAME);
-            localStorage.removeItem('player-volume');
-            location.reload();
-        }
-    });
-
-    document.getElementById('btn-export').addEventListener('click', async () => {
-        importStatus.textContent = "A exportar dados e áudios... Aguarde.";
-        importStatus.style.display = "block";
-
-        const backup = { playlists: [], tracks: [] };
-
-        const playlistsPromise = new Promise((resolve) => {
-            db.transaction('playlists', 'readonly').objectStore('playlists').getAll().onsuccess = (e) => resolve(e.target.result);
-        });
-        backup.playlists = await playlistsPromise;
-
-        const tracksPromise = new Promise((resolve) => {
-            db.transaction('tracks', 'readonly').objectStore('tracks').getAll().onsuccess = (e) => resolve(e.target.result);
-        });
-        const rawTracks = await tracksPromise;
-
-        for (let track of rawTracks) {
-            const base64Data = await blobToBase64(track.fileData);
-            backup.tracks.push({
-                playlistId: track.playlistId,
-                name: track.name,
-                order: track.order,
-                mimeType: track.fileData.type,
-                fileBase64: base64Data
-            });
-        }
-
-        const blob = new Blob([JSON.stringify(backup)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `liteplayer_backup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        
-        URL.revokeObjectURL(url);
-        importStatus.style.display = "none";
-    });
-
-    function blobToBase64(blob) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result.split(',')[1]);
-            reader.readAsDataURL(blob);
-        });
-    }
-
-    inputImport.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        importStatus.textContent = "A ler arquivo de backup...";
-        importStatus.style.display = "block";
-
-        const reader = new FileReader();
-        reader.onload = async (evt) => {
-            try {
-                const data = JSON.parse(evt.target.result);
-                if (!data.playlists || !data.tracks) {
-                    alert("Arquivo de backup inválido!");
-                    importStatus.style.display = "none";
-                    return;
-                }
-
-                importStatus.textContent = "A restaurar tabelas... Aguarde.";
+            <!-- Barra de Controles do Player -->
+            <footer class="bg-base-medium border-t border-base-light p-4 transition-cores">
+                <audio id="audioPlayer" preload="metadata">
                 
-                await new Promise((res) => {
-                    const tx1 = db.transaction(['playlists','tracks'], 'readwrite');
-                    tx1.objectStore('playlists').clear();
-                    tx1.objectStore('tracks').clear();
-                    tx1.oncomplete = () => res();
-                });
+                <div class="flex flex-col gap-3">
+                    <div class="flex justify-between text-sm">
+                        <span id="tituloAtual" class="font-medium">Nenhuma música selecionada</span>
+                        <span id="tempoAtual">00:00 / 00:00</span>
+                    </div>
 
-                const playlistIdMap = {};
+                    <!-- Barra de Progresso -->
+                    <div class="w-full h-2 bg-base-light rounded-full overflow-hidden cursor-pointer transition-cores" id="barraProgresso">
+                        <div id="progresso" class="h-full bg-accent rounded-full w-0 transition-all duration-150"></div>
+                    </div>
 
-                for (let pl of data.playlists) {
-                    const oldId = pl.id;
-                    delete pl.id; 
-                    await new Promise((res) => {
-                        db.transaction('playlists', 'readwrite').objectStore('playlists').add(pl).onsuccess = (ev) => {
-                            playlistIdMap[oldId] = ev.target.result;
-                            res();
-                        };
+                    <!-- Controles Principais -->
+                    <div class="flex items-center justify-center gap-6">
+                        <button id="btnAnterior" class="text-2xl hover-accent btn-hover transition-colors">
+                            <i class="fa fa-step-backward"></i>
+                        </button>
+                        <button id="btnPlay" class="text-4xl text-accent hover:brightness-110 btn-hover">
+                            <i class="fa fa-play-circle"></i>
+                        </button>
+                        <button id="btnProximo" class="text-2xl hover-accent btn-hover transition-colors">
+                            <i class="fa fa-step-forward"></i>
+                        </button>
+                        <div class="flex items-center gap-2 ml-6">
+                            <i class="fa fa-volume-up"></i>
+                            <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" class="w-28 accent-accent">
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
+    <script>
+        // Variáveis Globais
+        const audioPlayer = document.getElementById('audioPlayer');
+        const arquivosMusica = document.getElementById('arquivosMusica');
+        const listaPlaylist = document.getElementById('listaPlaylist');
+        const listaArquivos = document.getElementById('listaArquivos');
+        const listaLixeira = document.getElementById('listaLixeira');
+        const btnPlay = document.getElementById('btnPlay');
+        const btnAnterior = document.getElementById('btnAnterior');
+        const btnProximo = document.getElementById('btnProximo');
+        const tituloAtual = document.getElementById('tituloAtual');
+        const tempoAtual = document.getElementById('tempoAtual');
+        const barraProgresso = document.getElementById('barraProgresso');
+        const progresso = document.getElementById('progresso');
+        const volume = document.getElementById('volume');
+        const btnBackup = document.getElementById('btnBackup');
+        const btnRestore = document.getElementById('btnRestore');
+        const inputRestore = document.getElementById('inputRestore');
+        const esvaziarLixeira = document.getElementById('esvaziarLixeira');
+        const capaImagem = document.getElementById('capaImagem');
+        const infoAlbum = document.getElementById('infoAlbum');
+        const colorThief = new ColorThief();
+
+        let playlist = JSON.parse(localStorage.getItem('playlist')) || [];
+        let lixeira = JSON.parse(localStorage.getItem('lixeira')) || [];
+        let indiceAtual = 0;
+
+        // Funções Auxiliares
+        function formatarTempo(segundos) {
+            const min = Math.floor(segundos / 60);
+            const seg = Math.floor(segundos % 60);
+            return `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+        }
+
+        function salvarDados() {
+            localStorage.setItem('playlist', JSON.stringify(playlist));
+            localStorage.setItem('lixeira', JSON.stringify(lixeira));
+        }
+
+        // Extrair metadados e capa do arquivo
+        function lerMetadados(arquivo, callback) {
+            jsmediatags.read(arquivo, {
+                onSuccess: function(tag) {
+                    let capa = null;
+                    if (tag.tags.picture) {
+                        const data = tag.tags.picture.data;
+                        const format = tag.tags.picture.format;
+                        let base64String = "";
+                        for (let i = 0; i < data.length; i++) {
+                            base64String += String.fromCharCode(data[i]);
+                        }
+                        capa = `data:${format};base64,${window.btoa(base64String)}`;
+                    }
+                    const titulo = tag.tags.title || arquivo.name.replace(/\.[^/.]+$/, "");
+                    const artista = tag.tags.artist || "Artista Desconhecido";
+                    const album = tag.tags.album || "Álbum Desconhecido";
+                    callback({ titulo, artista, album, capa });
+                },
+                onError: function() {
+                    callback({
+                        titulo: arquivo.name.replace(/\.[^/.]+$/, ""),
+                        artista: "Artista Desconhecido",
+                        album: "Álbum Desconhecido",
+                        capa: null
                     });
                 }
-
-                const txT = db.transaction('tracks', 'readwrite');
-                const storeT = txT.objectStore('tracks');
-
-                for (let tr of data.tracks) {
-                    const blobAudio = base64ToBlob(tr.fileBase64, tr.mimeType);
-                    const newTrack = {
-                        playlistId: playlistIdMap[tr.playlistId] || activePlaylistId,
-                        name: tr.name,
-                        order: tr.order,
-                        fileData: blobAudio
-                    };
-                    storeT.add(newTrack);
-                }
-
-                txT.oncomplete = () => {
-                    importStatus.style.display = "none";
-                    alert("Backup restaurado com sucesso!");
-                    location.reload(); 
-                };
-
-            } catch (err) {
-                alert("Erro ao processar o arquivo de backup.");
-                importStatus.style.display = "none";
-                console.error(err);
-            }
-        };
-        reader.readAsText(file);
-    });
-
-    function base64ToBlob(base64, mimeType) {
-        const byteCharacters = atob(base64);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+            });
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        return new Blob([byteArray], { type: mimeType });
-    }
-</script>
 
+        // Extrair cor predominante da capa e aplicar no tema
+        function aplicarCoresDaCapa(urlImagem) {
+            if (!urlImagem) {
+                resetarCores();
+                return;
+            }
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = () => {
+                try {
+                    const cor = colorThief.getColor(img);
+                    const [r, g, b] = cor;
+                    const brilho = (r * 299 + g * 587 + b * 114) / 1000;
+                    
+                    // Ajusta cor para ficar visível no fundo escuro
+                    const fator = brilho < 120 ? 1.5 : 0.8;
+                    const nr = Math.min(255, Math.round(r * fator));
+                    const ng = Math.min(255, Math.round(g * fator));
+                    const nb = Math.min(255, Math.round(b * fator));
+
+                    document.documentElement.style.setProperty('--cor-accent', `rgb(${nr}, ${ng}, ${nb})`);
+                    document.documentElement.style.setProperty('--cor-accent-rgb', `${nr}, ${ng}, ${nb}`);
+                    document.documentElement.style.setProperty('--cor-accent-escura', `rgb(${Math.max(0, nr-40)}, ${Math.max(0, ng-40)}, ${Math.max(0, nb-40)})`);
+                    document.documentElement.style.setProperty('--cor-accent-clara', `rgb(${Math.min(255, nr+30)}, ${Math.min(255, ng+30)}, ${Math.min(255, nb+30)})`);
+                } catch (e) {
+                    resetarCores();
+                }
+            };
+            img.onerror = resetarCores;
+            img.src = urlImagem;
+        }
+
+        function resetarCores() {
+            document.documentElement.style.setProperty('--cor-accent', '#2E86AB');
+            document.documentElement.style.setProperty('--cor-accent-rgb', '46, 134, 171');
+            document.documentElement.style.setProperty('--cor-accent-escura', '#1f6885');
+            document.documentElement.style.setProperty('--cor-accent-clara', '#4298bd');
+        }
+
+        function renderizarPlaylist() {
+            listaPlaylist.innerHTML = playlist.length ? '' : '<li class="text-gray-400 text-center py-10">Nenhuma música adicionada ainda</li>';
+            playlist.forEach((musica, i) => {
+                const li = document.createElement('li');
+                li.className = `p-3 rounded flex justify-between items-center cursor-pointer hover:bg-base-light transition-cores ${i === indiceAtual ? 'bg-accent-alpha' : ''}`;
+                li.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1" onclick="tocarMusica(${i})">
+                        <div class="w-10 h-10 rounded bg-base-medium flex items-center justify-center overflow-hidden">
+                            ${musica.capa ? `<img src="${musica.capa}" class="w-full h-full object-cover">` : `<i class="fa fa-music text-gray-500"></i>`}
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="font-medium truncate">${musica.titulo}</p>
+                            <p class="text-xs text-gray-400 truncate">${musica.artista} • ${musica.album}</p>
+                        </div>
+                    </div>
+                    <button onclick="moverParaLixeira(${i})" class="text-red-500 hover:text-red-400 text-lg">
+                        <i class="fa fa-trash-o"></i>
+                    </button>
+                `;
+                listaPlaylist.appendChild(li);
+            });
+            salvarDados();
+        }
+
+        function renderizarLixeira() {
+            listaLixeira.innerHTML = lixeira.length ? '' : '<li class="text-gray-400 text-center py-10">Lixeira vazia</li>';
+            lixeira.forEach((musica, i) => {
+                const li = document.createElement('li');
+                li.className = 'p-3 rounded flex justify-between items-center hover:bg-base-light transition-cores';
+                li.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1">
+                        <div class="w-9 h-9 rounded bg-base-medium flex items-center justify-center overflow-hidden">
+                            ${musica.capa ? `<img src="${musica.capa}" class="w-full h-full object-cover">` : `<i class="fa fa-music text-gray-500"></i>`}
+                        </div>
+                        <div>
+                            <p class="font-medium">${musica.titulo}</p>
+                            <p class="text-xs text-gray-400">${musica.artista}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="restaurarDaLixeira(${i})" class="text-green-500 hover:text-green-400 text-lg">
+                            <i class="fa fa-undo"></i>
+                        </button>
+                        <button onclick="excluirDefinitivamente(${i})" class="text-red-500 hover:text-red-400 text-lg">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                listaLixeira.appendChild(li);
+            });
+            salvarDados();
+        }
+
+        function tocarMusica(indice) {
+            if (!playlist[indice]) return;
+            indiceAtual = indice;
+            const musica = playlist[indice];
+            
+            audioPlayer.src = musica.url;
+            tituloAtual.textContent = `${musica.titulo} - ${musica.artista}`;
+            infoAlbum.textContent = `${musica.artista} • ${musica.album}`;
+            
+            // Atualizar capa
+            if (musica.capa) {
+                capaImagem.src = musica.capa;
+                capaImagem.classList.remove('hidden');
+                document.querySelector('#capaContainer > i').classList.add('hidden');
+                aplicarCoresDaCapa(musica.capa);
+            } else {
+                capaImagem.classList.add('hidden');
+                document.querySelector('#capaContainer > i').classList.remove('hidden');
+                resetarCores();
+            }
+
+            audioPlayer.play();
+            btnPlay.innerHTML = '<i class="fa fa-pause-circle"></i>';
+            renderizarPlaylist();
+        }
+
+        function moverParaLixeira(indice) {
+            const removida = playlist.splice(indice, 1)[0];
+            lixeira.push(removida);
+            if (indice === indiceAtual) {
+                audioPlayer.pause();
+                tituloAtual.textContent = 'Nenhuma música selecionada';
+                infoAlbum.textContent = '';
+                capaImagem.classList.add('hidden');
+                document.querySelector('#capaContainer > i').classList.remove('hidden');
+                btnPlay.innerHTML = '<i class="fa fa-play-circle"></i>';
+                resetarCores();
+            }
+            renderizarPlaylist();
+            renderizarLixeira();
+        }
+
+        function restaurarDaLixeira(indice) {
+            const restaurada = lixeira.splice(indice, 1)[0];
+            playlist.push(restaurada);
+            renderizarPlaylist();
+            renderizarLixeira();
+        }
+
+        function excluirDefinitivamente(indice) {
+            lixeira.splice(indice, 1);
+            renderizarLixeira();
+        }
+
+        // Eventos
+        arquivosMusica.addEventListener('change', (e) => {
+            const arquivos = e.target.files;
+            Array.from(arquivos).forEach(arquivo => {
+                const url = URL.createObjectURL(arquivo);
+                lerMetadados(arquivo, dados => {
+                    playlist.push({
+                        url: url,
+                        titulo: dados.titulo,
+                        artista: dados.artista,
+                        album: dados.album,
+                        capa: dados.capa
+                    });
+                    renderizarPlaylist();
+                });
+            });
+        });
+
+        btnPlay.addEventListener('click', () => {
+            if (playlist.length === 0) return;
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                btnPlay.innerHTML = '<i class="fa fa-pause-circle"></i>';
+            } else {
+                audioPlayer.pause();
+                btnPlay.innerHTML = '<i class="fa fa-play-circle"></i>';
+            }
+        });
+
+        btnAnterior.addEventListener('click', () => {
+            if (playlist.length === 0) return;
+            indiceAtual = (indiceAtual - 1 + playlist.length) % playlist.length;
+            tocarMusica(indiceAtual);
+        });
+
+        btnProximo.addEventListener('click', () => {
+            if (playlist.length === 0) return;
+            indiceAtual = (indiceAtual + 1) % playlist.length;
+            tocarMusica(indiceAtual);
+        });
+
+        audioPlayer.addEventListener('timeupdate', () => {
+            const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100 || 0;
+            progresso.style.width = `${percent}%`;
+            tempoAtual.textContent = `${formatarTempo(audioPlayer.currentTime)} / ${formatarTempo(audioPlayer.duration || 0)}`;
+        });
+
+        audioPlayer.addEventListener('ended', () => btnProximo.click());
+
+        barraProgresso.addEventListener('click', (e) => {
+            const largura = barraProgresso.clientWidth;
+            const posicao = e.offsetX;
+            const tempo = (posicao / largura) * audioPlayer.duration;
+            if (!isNaN(tempo)) audioPlayer.currentTime = tempo;
+        });
+
+        volume.addEventListener('input', () => audioPlayer.volume = volume.value);
+
+        // Navegação entre abas
+        document.querySelectorAll('[data-tab]').forEach(aba => {
+            aba.addEventListener('click', () => {
+                document.querySelectorAll('.tab-conteudo').forEach(t => t.classList.add('hidden'));
+                document.getElementById(`tab-${aba.dataset.tab}`).classList.remove('hidden');
+                document.querySelectorAll('[data-tab]').forEach(a => a.classList.remove('bg-accent-alpha'));
+                aba.classList.add('bg-accent-alpha');
+            });
+        });
+
+        // Sistema de Backup
+        btnBackup.addEventListener('click', () => {
+            const dados = { playlist, lixeira };
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup-player-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        btnRestore.addEventListener('click', () => inputRestore.click());
+        inputRestore.addEventListener('change', (e) => {
+            const arquivo = e.target.files[0];
+            if (!arquivo) return;
+            const leitor = new FileReader();
+            leitor.onload = (evt) => {
+                try {
+                    const dados = JSON.parse(evt.target.result);
+                    playlist = dados.playlist || [];
+                    lixeira = dados.lixeira || [];
+                    renderizarPlaylist();
+                    renderizarLixeira();
+                    alert('Backup restaurado com sucesso!');
+                } catch {
+                    alert('Arquivo de backup inválido!');
+                }
+            };
+            leitor.readAsText(arquivo);
+        });
+
+        esvaziarLixeira.addEventListener('click', () => {
+            if (confirm('Deseja esvaziar a lixeira definitivamente?')) {
+                lixeira = [];
+                renderizarLixeira();
+            }
+        });
+
+        // Inicialização
+        renderizarPlaylist();
+        renderizarLixeira();
+    </script>
 </body>
 </html>
